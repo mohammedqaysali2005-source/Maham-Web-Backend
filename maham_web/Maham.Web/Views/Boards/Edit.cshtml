@@ -1,0 +1,49 @@
+@model Maham.Application.DTOs.Board.UpdateBoardDto
+@{
+    ViewData["Title"] = "تعديل اللوحة";
+    var boardId = ViewBag.BoardId;
+    var projectId = ViewBag.ProjectId;
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-6">
+        <div class="card p-4 shadow-sm">
+            <h3 class="fw-bold text-warning mb-4 border-bottom pb-2">
+                <i class="bi bi-pencil-square me-2 text-primary"></i>تعديل بيانات اللوحة
+            </h3>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i> @ViewBag.Error
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <form action="/boards/@boardId/edit" method="post">
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">اسم اللوحة</label>
+                    <input asp-for="Name" class="form-control" required maxlength="100" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label">الوصف</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="BackgroundColor" class="form-label">لون اللوحة</label>
+                    <input asp-for="BackgroundColor" type="color" class="form-control form-control-color w-100" />
+                    <span asp-validation-for="BackgroundColor" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-warning text-white px-4 py-2"><i class="bi bi-save me-1"></i> حفظ التغييرات</button>
+                    <a href="/boards/@boardId" class="btn btn-outline-secondary px-4 py-2">إلغاء</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

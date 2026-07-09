@@ -1,0 +1,142 @@
+@model List<Maham.Web.Services.WebCardDto>
+@{
+    ViewData["Title"] = "بطاقات المشروع";
+    var projectId = ViewBag.ProjectId;
+}
+
+<div class="page-header pb-2 mb-3">
+    <h2 class="page-title"><i class="bi bi-card-list me-2 text-accent"></i>بطاقات المشروع</h2>
+    <a href="/projects/@projectId" class="btn btn-outline-secondary"><i class="bi bi-arrow-right me-1"></i>عودة للمشروع</a>
+</div>
+
+<!-- Client-Side Filter Bar for Project Cards -->
+<div class="card shadow-sm p-3 mb-4 border-0 rounded-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-search me-1"></i>بحث</label>
+            <input type="text" id="projCardSearch" class="form-control bg-light" placeholder="ابحث بعنوان البطاقة..." oninput="filterProjectCards()" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-flag me-1"></i>الأولوية</label>
+            <select id="projCardPriority" class="form-select bg-light" onchange="filterProjectCards()">
+                <option value="">الكل</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-clipboard-check me-1"></i>الحالة</label>
+            <select id="projCardStatus" class="form-select bg-light" onchange="filterProjectCards()">
+                <option value="">الكل</option>
+                <option value="todo">Todo</option>
+                <option value="inprogress">InProgress</option>
+                <option value="done">Done</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-person me-1"></i>المسؤول</label>
+            <input type="text" id="projCardAssignee" class="form-control bg-light" placeholder="اسم المسؤول..." oninput="filterProjectCards()" />
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-outline-secondary w-100" onclick="resetProjectCardFilters()">
+                <i class="bi bi-x-circle me-1"></i>إعادة ضبط
+            </button>
+        </div>
+    </div>
+    <div id="projCardFilterInfo" class="mt-2 d-none">
+        <span class="text-muted small"><i class="bi bi-funnel me-1"></i>عرض <strong id="projVisibleCount" class="text-primary">0</strong> من <strong id="projTotalCount" class="text-primary">0</strong> بطاقة</span>
+    </div>
+</div>
+
+<div class="card shadow-sm p-4 border-0 rounded-4">
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle dt-table w-100" id="projCardsTable">
+                <thead>
+                    <tr>
+                        <th>عنوان المهمة</th>
+                        <th>الأولوية</th>
+                        <th>الحالة</th>
+                        <th>المسؤول عنها</th>
+                        <th>تاريخ الاستحقاق</th>
+                        <th class="text-center">عمليات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var card in Model)
+                    {
+                        <tr data-title="@card.Title.ToLower()" data-priority="@card.Priority.ToLower()" data-status="@card.Status.ToLower()" data-assignee="@(card.AssigneeName ?? "غير معين")">
+                            <td class="fw-bold"><a href="/cards/@card.Id" class="text-decoration-none text-primary">@card.Title</a></td>
+                            <td><span class="badge badge-priority-@card.Priority.ToLower()">@card.Priority</span></td>
+                            <td><span class="badge badge-status-@card.Status.ToLower()">@card.Status</span></td>
+                            <td>@(card.AssigneeName ?? "غير معين")</td>
+                            <td>@(card.DueDate?.ToString("yyyy-MM-dd") ?? "لا يوجد")</td>
+                            <td class="text-center">
+                                <a href="/cards/@card.Id" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="bi bi-clipboard-x"></i>
+            <h5>لا توجد مهام مضافة لهذا المشروع حتى الآن</h5>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function filterProjectCards() {
+            var searchVal = (document.getElementById('projCardSearch').value || '').toLowerCase().trim();
+            var priorityVal = (document.getElementById('projCardPriority').value || '').toLowerCase();
+            var statusVal = (document.getElementById('projCardStatus').value || '').toLowerCase();
+            var assigneeVal = (document.getElementById('projCardAssignee').value || '').toLowerCase().trim();
+
+            var rows = document.querySelectorAll('#projCardsTable tbody tr');
+            var total = rows.length;
+            var visible = 0;
+
+            rows.forEach(function (row) {
+                var title = row.getAttribute('data-title') || '';
+                var priority = row.getAttribute('data-priority') || '';
+                var status = row.getAttribute('data-status') || '';
+                var assignee = (row.getAttribute('data-assignee') || '').toLowerCase();
+
+                var show = true;
+                if (searchVal && !title.includes(searchVal)) show = false;
+                if (priorityVal && priority !== priorityVal) show = false;
+                if (statusVal && status !== statusVal) show = false;
+                if (assigneeVal && !assignee.includes(assigneeVal)) show = false;
+
+                row.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+
+            var infoEl = document.getElementById('projCardFilterInfo');
+            var hasFilter = searchVal || priorityVal || statusVal || assigneeVal;
+            if (hasFilter) {
+                infoEl.classList.remove('d-none');
+                document.getElementById('projVisibleCount').textContent = visible;
+                document.getElementById('projTotalCount').textContent = total;
+            } else {
+                infoEl.classList.add('d-none');
+            }
+        }
+
+        function resetProjectCardFilters() {
+            document.getElementById('projCardSearch').value = '';
+            document.getElementById('projCardPriority').value = '';
+            document.getElementById('projCardStatus').value = '';
+            document.getElementById('projCardAssignee').value = '';
+            filterProjectCards();
+        }
+    </script>
+}

@@ -1,0 +1,63 @@
+@model Maham.Application.DTOs.Project.AddProjectMemberDto
+@{
+    ViewData["Title"] = "دعوة / إضافة عضو للمشروع";
+    var projectId = ViewBag.ProjectId;
+    var allUsers = ViewBag.AllUsers as List<Maham.Web.Services.WebUserDto> ?? new();
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-7 col-lg-6">
+        <div class="card p-4 shadow-sm border-0 rounded-4">
+            <h3 class="fw-bold text-primary mb-3 border-bottom pb-2">
+                <i class="bi bi-person-plus me-2 text-accent" style="color: #e94560;"></i>دعوة وإضافة عضو إلى المشروع
+            </h3>
+            <p class="text-muted small mb-4">
+                قم بإدخال البريد الإلكتروني للمستخدم أو اختر مستخدماً موجوداً في النظام لإضافته وتعيين دوره في المشروع.
+            </p>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show rounded-3" role="alert">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i> @ViewBag.Error
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <form action="/projects/@projectId/members/add" method="post">
+                <!-- Email Search & Invitation Input -->
+                <div class="mb-4">
+                    <label asp-for="Email" class="form-label fw-semibold">البريد الإلكتروني للعضو</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-envelope-at text-primary"></i></span>
+                        <input asp-for="Email" type="email" id="emailInput" list="usersDatalist" class="form-control bg-light" placeholder="user@example.com" required autocomplete="off" />
+                    </div>
+                    <datalist id="usersDatalist">
+                        @foreach (var user in allUsers)
+                        {
+                            <option value="@user.Email">@user.FullName (@user.Email)</option>
+                        }
+                    </datalist>
+                    <div class="form-text text-muted">يمكنك الاختيار من المقترحات أو كتابة بريد إلكتروني مباشر.</div>
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <!-- Select Role -->
+                <div class="mb-4">
+                    <label asp-for="Role" class="form-label fw-semibold">الدور في المشروع (Role)</label>
+                    <select asp-for="Role" class="form-select bg-light" asp-items="Html.GetEnumSelectList<Maham.Domain.Enums.ProjectMemberRole>()"></select>
+                    <div class="form-text text-muted">
+                        <strong>Member</strong>: إنشاء وتعديل البطاقات | <strong>Admin</strong>: إدارة اللوحات والبطاقات والأعضاء | <strong>Owner</strong>: المالك الكامل للمشروع.
+                    </div>
+                    <span asp-validation-for="Role" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex gap-2 pt-2">
+                    <button type="submit" class="btn btn-primary px-4 py-2.5 fw-bold shadow-sm" style="background-color: #0f3460; border-color: #0f3460;">
+                        <i class="bi bi-send me-1"></i> إرسال الدعوة وإضافة العضو
+                    </button>
+                    <a href="/projects/@projectId/members" class="btn btn-outline-secondary px-4 py-2.5">إلغاء</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

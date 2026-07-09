@@ -1,0 +1,68 @@
+@model Maham.Application.DTOs.Card.CreateCardDto
+@{
+    ViewData["Title"] = "بطاقة جديدة";
+    var columnId = ViewBag.ColumnId;
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-6">
+        <div class="card p-4 shadow-sm">
+            <h3 class="fw-bold text-primary mb-4 border-bottom pb-2">
+                <i class="bi bi-card-plus me-2 text-accent"></i>إضافة بطاقة جديدة
+            </h3>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i> @ViewBag.Error
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <form action="/columns/@columnId/cards/create" method="post">
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label">العنوان</label>
+                    <input asp-for="Title" class="form-control" placeholder="عنوان البطاقة" required maxlength="150" />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label">الوصف</label>
+                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="أدخل تفاصيل المهمة..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Priority" class="form-label">الأولوية</label>
+                        <select asp-for="Priority" class="form-select" asp-items="Html.GetEnumSelectList<Maham.Domain.Enums.Priority>()"></select>
+                        <span asp-validation-for="Priority" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="DueDate" class="form-label">تاريخ الاستحقاق</label>
+                        <input asp-for="DueDate" type="date" class="form-control" />
+                        <span asp-validation-for="DueDate" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="StoryPoints" class="form-label">نقاط الجهد (Story Points)</label>
+                        <input asp-for="StoryPoints" type="number" class="form-control" placeholder="اختياري" />
+                        <span asp-validation-for="StoryPoints" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Labels" class="form-label">التسميات (Labels)</label>
+                        <input asp-for="Labels" class="form-control" placeholder="مثال: Bug, Feature" />
+                        <span asp-validation-for="Labels" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4 py-2"><i class="bi bi-save me-1"></i> حفظ البطاقة</button>
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary px-4 py-2">إلغاء</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

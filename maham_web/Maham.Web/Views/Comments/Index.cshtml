@@ -1,0 +1,55 @@
+@model List<Maham.Web.Services.WebCommentDto>
+@{
+    ViewData["Title"] = "التعليقات";
+    var cardId = ViewBag.CardId;
+}
+
+<div class="page-header pb-2 mb-3">
+    <h2 class="page-title"><i class="bi bi-chat-left-text me-2 text-accent"></i>تعليقات المهمة</h2>
+    <div class="d-flex gap-2">
+        <a href="/cards/@cardId/comments/create" class="btn btn-accent"><i class="bi bi-plus-lg me-1"></i>إضافة تعليق جديد</a>
+        <a href="/cards/@cardId" class="btn btn-outline-secondary"><i class="bi bi-arrow-right me-1"></i>عودة للبطاقة</a>
+    </div>
+</div>
+
+<div class="card shadow-sm p-4">
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle dt-table w-100">
+                <thead>
+                    <tr>
+                        <th>الكاتب</th>
+                        <th>التعليق</th>
+                        <th>تاريخ الكتابة</th>
+                        <th class="text-center">عمليات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var comment in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold text-primary">@comment.AuthorName</td>
+                            <td>@comment.Content</td>
+                            <td>@comment.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="/comments/@comment.Id" class="btn btn-primary" title="التفاصيل"><i class="bi bi-eye"></i></a>
+                                    <a href="/comments/@comment.Id/edit" class="btn btn-warning text-white" title="تعديل"><i class="bi bi-pencil"></i></a>
+                                    <a href="/comments/@comment.Id/delete" class="btn btn-danger" title="حذف"><i class="bi bi-trash"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state py-5 text-center">
+            <i class="bi bi-chat-left-text"></i>
+            <h5>لا توجد تعليقات حتى الآن</h5>
+        </div>
+    }
+</div>

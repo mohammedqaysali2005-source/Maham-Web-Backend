@@ -1,0 +1,77 @@
+@using Maham.Web.Helpers
+@model List<Maham.Web.Services.WebUserDto>
+@{
+    ViewData["Title"] = "المستخدمون";
+    var q = ViewBag.SearchQuery as string;
+}
+
+<div class="page-header pb-2 mb-3">
+    <h2 class="page-title"><i class="bi bi-people text-accent me-2"></i>قائمة المستخدمين</h2>
+</div>
+
+<!-- Search Form -->
+<div class="card shadow-sm p-3 mb-4 border-0 rounded-4">
+    <form action="/users" method="get" class="row g-2 align-items-end">
+        <div class="col-md-9">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" name="q" value="@q" class="form-control bg-light border-start-0" placeholder="ابحث بالاسم أو البريد الإلكتروني..." />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search me-1"></i>بحث</button>
+                @if (!string.IsNullOrEmpty(q))
+                {
+                    <a href="/users" class="btn btn-outline-secondary w-100"><i class="bi bi-x-lg me-1"></i>مسح</a>
+                }
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Users Cards Grid (Matching Mobile Style) -->
+@if (Model.Any())
+{
+    <div class="row g-3">
+        @foreach (var user in Model)
+        {
+            <div class="col-md-4">
+                <div class="card p-3 shadow-sm h-100 d-flex flex-column justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        @if (!string.IsNullOrEmpty(user.AvatarUrl))
+                        {
+                            <img src="@user.AvatarUrl" class="rounded-circle" width="48" height="48" alt="@user.FullName" style="object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width:48px;height:48px;font-size:1.3rem; background-color: var(--primary);">
+                                @(user.FullName.Length > 0 ? user.FullName[0] : '؟')
+                            </div>
+                        }
+                        <div>
+                            <h6 class="fw-bold mb-1 text-primary">@user.FullName</h6>
+                            <span class="text-muted small">@user.Email</span>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                        <span class="badge @(user.Role == "Admin" ? "badge-role-admin" : "badge-role-member")">@TranslationHelper.ToArabicRole(user.Role)</span>
+                        <div class="btn-group btn-group-sm">
+                            <a href="/users/@user.Id" class="btn btn-primary" title="التفاصيل"><i class="bi bi-eye"></i></a>
+                            <a href="/users/@user.Id/delete" class="btn btn-danger" title="حذف"><i class="bi bi-trash"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="card shadow-sm p-5 border-0 rounded-4 text-center">
+        <div class="empty-state py-4">
+            <i class="bi bi-people display-3 text-muted d-block mb-3"></i>
+            <h5>@(string.IsNullOrEmpty(q) ? "لا يوجد مستخدمون مضافين" : $"لا توجد نتائج للبحث عن \"{q}\"")</h5>
+        </div>
+    </div>
+}

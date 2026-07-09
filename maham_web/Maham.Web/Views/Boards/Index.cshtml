@@ -1,0 +1,56 @@
+@model List<Maham.Web.Services.WebBoardDto>
+@{
+    ViewData["Title"] = "لوحات المشروع";
+    var projectId = ViewBag.ProjectId;
+}
+
+<div class="page-header">
+    <h2 class="page-title"><i class="bi bi-grid-3x3-gap"></i>لوحات المشروع</h2>
+    <div class="d-flex gap-2">
+        <a href="/boards/create/@projectId" class="btn btn-accent"><i class="bi bi-plus-lg me-1"></i>إضافة لوحة جديدة</a>
+        <a href="/projects/@projectId" class="btn btn-outline-secondary"><i class="bi bi-arrow-right me-1"></i>عودة للمشروع</a>
+    </div>
+</div>
+
+<div class="card shadow-sm p-4">
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle dt-table w-100">
+                <thead>
+                    <tr>
+                        <th>اسم اللوحة</th>
+                        <th>الوصف</th>
+                        <th>تاريخ الإنشاء</th>
+                        <th class="text-center">عمليات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var board in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold"><a href="/boards/@board.Id" class="text-decoration-none text-primary">@board.Name</a></td>
+                            <td>@(board.Description ?? "لا يوجد وصف")</td>
+                            <td>@board.CreatedAt.ToString("yyyy-MM-dd")</td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="/boards/@board.Id" class="btn btn-primary" title="عرض اللوحة (Kanban)"><i class="bi bi-kanban"></i></a>
+                                    <a href="/boards/@board.Id/edit" class="btn btn-warning text-white" title="تعديل"><i class="bi bi-pencil"></i></a>
+                                    <a href="/boards/@board.Id/delete" class="btn btn-danger" title="حذف"><i class="bi bi-trash"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="bi bi-grid-3x3-gap"></i>
+            <h5>لا توجد لوحات مضافة لهذا المشروع حتى الآن</h5>
+            <a href="/boards/create/@projectId" class="btn btn-accent mt-2"><i class="bi bi-plus-lg me-1"></i>لوحة جديدة</a>
+        </div>
+    }
+</div>

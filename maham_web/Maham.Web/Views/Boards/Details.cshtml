@@ -1,0 +1,447 @@
+@using Maham.Web.Helpers
+@model Maham.Web.Services.WebBoardDto
+@{
+    ViewData["Title"] = $"لوحة {Model.Name}";
+    var members = ViewBag.Members as List<Maham.Web.Services.WebMemberDto> ?? new();
+    var token = SessionHelper.GetToken(Context.Session);
+}
+
+<div class="page-header pb-2 mb-3">
+    <div class="d-flex align-items-center gap-2">
+        <h2 class="page-title"><i class="bi bi-grid-3x3-gap text-accent"></i>@Model.Name</h2>
+        <span class="badge bg-secondary">لوحة Kanban</span>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addColumnModal">
+            <i class="bi bi-plus-circle me-1"></i>إضافة عمود
+        </button>
+        <a href="/boards/@Model.Id/activity" class="btn btn-outline-warning text-dark"><i class="bi bi-clock-history me-1"></i>النشاط</a>
+        <a href="/boards/@Model.Id/edit" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i>تعديل اللوحة</a>
+        <a href="/projects/@Model.ProjectId" class="btn btn-outline-secondary"><i class="bi bi-arrow-right me-1"></i>عودة للمشروع</a>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Description))
+{
+    <p class="text-muted mb-3">@Model.Description</p>
+}
+
+<!-- SignalR Presence Bar -->
+<div class="card shadow-xs border-0 rounded-4 mb-4 bg-white p-3 border-start border-4 border-success">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+            <span class="spinner-grow spinner-grow-sm text-success" role="status"></span>
+            <h6 class="mb-0 fw-bold text-primary">
+                <i class="bi bi-broadcast me-1 text-success"></i>المتواجدون حالياً في اللوحة (Presence Bar):
+            </h6>
+        </div>
+        <div id="presenceUsersContainer" class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="badge bg-light text-muted border"><i class="bi bi-arrow-repeat me-1"></i>جاري الاتصال بالتواجد اللحظي...</span>
+        </div>
+    </div>
+</div>
+
+<!-- Kanban Board Search & Filter Bar (Client-Side) -->
+<div class="card shadow-sm p-3 mb-3 border-0 rounded-4">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-search me-1"></i>بحث في البطاقات</label>
+            <input type="text" id="kanbanSearchInput" class="form-control bg-light" placeholder="ابحث بعنوان البطاقة..." oninput="filterKanbanCards()" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-flag me-1"></i>الأولوية</label>
+            <select id="kanbanPriorityFilter" class="form-select bg-light" onchange="filterKanbanCards()">
+                <option value="">الكل</option>
+                <option value="low">منخفضة</option>
+                <option value="medium">متوسطة</option>
+                <option value="high">عالية</option>
+                <option value="critical">حرجة</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-clipboard-check me-1"></i>الحالة</label>
+            <select id="kanbanStatusFilter" class="form-select bg-light" onchange="filterKanbanCards()">
+                <option value="">الكل</option>
+                <option value="todo">Todo</option>
+                <option value="inprogress">InProgress</option>
+                <option value="done">Done</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-person me-1"></i>المسؤول</label>
+            <select id="kanbanAssigneeFilter" class="form-select bg-light" onchange="filterKanbanCards()">
+                <option value="">الكل</option>
+                <option value="__unassigned__">غير معين</option>
+                @foreach (var m in members)
+                {
+                    <option value="@m.UserName">@m.UserName</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-outline-secondary w-100" onclick="resetKanbanFilters()">
+                <i class="bi bi-x-circle me-1"></i>إعادة ضبط
+            </button>
+        </div>
+    </div>
+    <div id="kanbanFilterInfo" class="mt-2 d-none">
+        <span class="text-muted small"><i class="bi bi-funnel me-1"></i>عرض <strong id="kanbanVisibleCount" class="text-primary">0</strong> من <strong id="kanbanTotalCount" class="text-primary">0</strong> بطاقة</span>
+    </div>
+</div>
+
+<div class="kanban-wrapper">
+    <div class="kanban-board">
+        @if (Model.Columns != null && Model.Columns.Any())
+        {
+            @foreach (var col in Model.Columns.OrderBy(c => c.Order))
+            {
+                <div class="kanban-column shadow-xs" data-column-id="@col.Id">
+                    <div class="kanban-col-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="kanban-col-title">@col.Name</span>
+                            <span class="kanban-col-count">@col.Cards.Count</span>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-link p-0 text-muted" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li><a class="dropdown-item" href="/columns/@col.Id/edit"><i class="bi bi-pencil me-2 text-warning"></i>تعديل العمود</a></li>
+                                <li><a class="dropdown-item text-danger" href="/columns/@col.Id/delete"><i class="bi bi-trash me-2 text-danger"></i>حذف العمود</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="kanban-cards sortable-list" data-column-id="@col.Id">
+                        @foreach (var card in col.Cards.OrderBy(c => c.Order))
+                        {
+                            <div class="kanban-card priority-@card.Priority.ToLower()" data-card-id="@card.Id">
+                                @if (!string.IsNullOrEmpty(card.CoverImageUrl))
+                                {
+                                    <img src="@card.CoverImageUrl" class="card-cover mb-2" alt="Cover" />
+                                }
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <div class="kanban-card-title me-2 flex-grow-1">
+                                        <a href="/cards/@card.Id" class="text-decoration-none text-dark hover-primary">@card.Title</a>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-link p-0 text-muted" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                            <li><a class="dropdown-item small" href="/cards/@card.Id"><i class="bi bi-eye me-2 text-info"></i>عرض التفاصيل</a></li>
+                                            <li><a class="dropdown-item small" href="/cards/@card.Id/move"><i class="bi bi-arrow-left-right me-2 text-primary"></i>نقل إلى عمود آخر...</a></li>
+                                            <li><a class="dropdown-item small" href="/cards/@card.Id/edit"><i class="bi bi-pencil me-2 text-warning"></i>تعديل</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item small text-danger" href="/cards/@card.Id/delete"><i class="bi bi-trash me-2"></i>حذف</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="kanban-card-meta mb-2">
+                                    <span class="badge badge-priority-@card.Priority.ToLower()">@TranslationHelper.ToArabicPriority(card.Priority)</span>
+                                    <span class="badge badge-status-@card.Status.ToLower()">@TranslationHelper.ToArabicStatus(card.Status)</span>
+                                    @if (card.StoryPoints.HasValue)
+                                    {
+                                        <span class="badge bg-light text-dark border"><i class="bi bi-lightning-fill me-1 text-warning"></i>@card.StoryPoints نقاط جهد</span>
+                                    }
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="font-size: 0.78rem; color: var(--text-secondary);">
+                                    <span>
+                                        <i class="bi bi-person me-1"></i>@(card.AssigneeName ?? "غير معين")
+                                    </span>
+                                    @if (card.DueDate.HasValue)
+                                    {
+                                        <span class="@(card.DueDate.Value < DateTime.Today && card.Status != "Done" ? "text-danger fw-bold" : "")">
+                                            <i class="bi bi-calendar me-1"></i>@card.DueDate.Value.ToString("MM-dd")
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="kanban-col-footer">
+                        <button type="button" class="kanban-add-btn" onclick="openAddCardModal('@col.Id', '@col.Name')">
+                            <i class="bi bi-plus-lg me-1"></i>إضافة بطاقة
+                        </button>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state py-5 bg-white border rounded w-100 text-center">
+                <i class="bi bi-layout-three-columns display-3 text-muted"></i>
+                <h5 class="fw-bold mt-3">لا توجد أعمدة في هذه اللوحة بعد</h5>
+                <p class="text-muted">أضف أعمدة مثل (قيد الانتظار، جاري العمل، منتهي) للبدء في تنظيم المهام.</p>
+                <button type="button" class="btn btn-primary px-4 mt-2" data-bs-toggle="modal" data-bs-target="#addColumnModal">
+                    <i class="bi bi-plus-circle me-1"></i>إضافة أول عمود
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal: Add Column -->
+<div class="modal fade" id="addColumnModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="/boards/@Model.Id/columns/create" method="post">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>إضافة عمود جديد</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">اسم العمود</label>
+                        <input type="text" name="Name" class="form-control" placeholder="مثال: قيد الانتظار" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">حد العمل الجاري (WIP Limit)</label>
+                        <input type="number" name="WipLimit" class="form-control" placeholder="اختياري" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary fw-bold">حفظ العمود</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Add Card -->
+<div class="modal fade" id="addCardModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="addCardForm" method="post">
+                <div class="modal-header bg-accent text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-card-plus me-2"></i>إضافة بطاقة جديدة - <span id="colNameLabel"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">عنوان البطاقة</label>
+                        <input type="text" name="Title" class="form-control" placeholder="عنوان المهمة" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">الوصف</label>
+                        <textarea name="Description" class="form-control" rows="3" placeholder="وصف تفصيلي..."></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">الأولوية</label>
+                            <select name="Priority" class="form-select">
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">تاريخ الاستحقاق</label>
+                            <input type="date" name="DueDate" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">نقاط الجهد (Story Points)</label>
+                            <input type="number" name="StoryPoints" class="form-control" placeholder="مثال: 3" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">التسميات (Labels)</label>
+                            <input type="text" name="Labels" class="form-control" placeholder="Bug, Dev, UI" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-accent fw-bold">حفظ البطاقة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- SignalR JS Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        function openAddCardModal(colId, colName) {
+            var form = document.getElementById('addCardForm');
+            if (form) {
+                form.action = '/columns/' + colId + '/cards/create';
+            }
+            var label = document.getElementById('colNameLabel');
+            if (label) {
+                label.textContent = colName;
+            }
+            var modalEl = document.getElementById('addCardModal');
+            if (modalEl) {
+                var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        }
+
+        $(document).ready(function () {
+
+            // 2. تهيئة السحب والإفلات لبطاقات اللوحة
+            document.querySelectorAll('.sortable-list').forEach(function (el) {
+                Sortable.create(el, {
+                    group: 'kanban',
+                    animation: 150,
+                    ghostClass: 'bg-light',
+                    onEnd: function (evt) {
+                        var cardId = evt.item.getAttribute('data-card-id');
+                        var toColumnId = evt.to.getAttribute('data-column-id');
+                        var newOrder = evt.newIndex;
+
+                        $.ajax({
+                            url: '/cards/' + cardId + '/move',
+                            type: 'POST',
+                            data: {
+                                toColumnId: toColumnId,
+                                newOrder: newOrder
+                            },
+                            success: function (res) {
+                                console.log('Card moved successfully');
+                                // Update column card counts dynamically
+                                document.querySelectorAll('.kanban-column').forEach(function (col) {
+                                    var count = col.querySelectorAll('.kanban-card').length;
+                                    var countEl = col.querySelector('.kanban-col-count');
+                                    if (countEl) countEl.textContent = count;
+                                });
+                            },
+                            error: function (err) {
+                                console.error('Error moving card', err);
+                            }
+                        });
+                    }
+                });
+            });
+
+            // 3. SignalR Presence Bar Connection
+            var boardId = "@Model.Id";
+            var token = "@token";
+
+            var connection = new signalR.HubConnectionBuilder()
+                .withUrl("http://localhost:5233/hubs/board?access_token=" + encodeURIComponent(token))
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("PresenceUpdate", function (users) {
+                var container = $('#presenceUsersContainer');
+                container.empty();
+
+                if (users && users.length > 0) {
+                    users.forEach(function (u) {
+                        var userBadge = `
+                            <div class="d-inline-flex align-items-center bg-light border border-success rounded-pill px-3 py-1 shadow-xs">
+                                <span class="badge bg-success rounded-circle p-1 me-2" style="width: 8px; height: 8px;"></span>
+                                <span class="fw-bold text-dark small">${u.userName || u.userName || 'عضو'}</span>
+                            </div>
+                        `;
+                        container.append(userBadge);
+                    });
+                } else {
+                    container.append('<span class="badge bg-light text-muted border">لا يوجد متواجدون آخرون</span>');
+                }
+            });
+
+            connection.start().then(function () {
+                connection.invoke("JoinBoard", boardId).catch(function (err) {
+                    console.error("Error joining board presence:", err);
+                });
+            }).catch(function (err) {
+                console.error("SignalR Connection Error:", err);
+                $('#presenceUsersContainer').html('<span class="badge bg-light text-secondary border">التواجد محلي</span>');
+            });
+        });
+
+        // ===== Kanban Board Client-Side Filtering =====
+        function filterKanbanCards() {
+            var searchVal = (document.getElementById('kanbanSearchInput').value || '').toLowerCase().trim();
+            var priorityVal = (document.getElementById('kanbanPriorityFilter').value || '').toLowerCase();
+            var statusVal = (document.getElementById('kanbanStatusFilter').value || '').toLowerCase();
+            var assigneeVal = (document.getElementById('kanbanAssigneeFilter').value || '');
+
+            var allCards = document.querySelectorAll('.kanban-card');
+            var total = allCards.length;
+            var visible = 0;
+
+            allCards.forEach(function (card) {
+                var titleEl = card.querySelector('.kanban-card-title a');
+                var title = titleEl ? titleEl.textContent.toLowerCase() : '';
+
+                // Extract priority from badge
+                var priorityBadge = card.querySelector('.badge-priority-low, .badge-priority-medium, .badge-priority-high, .badge-priority-critical');
+                var cardPriority = '';
+                if (priorityBadge) {
+                    var cls = priorityBadge.className;
+                    if (cls.includes('priority-low')) cardPriority = 'low';
+                    else if (cls.includes('priority-medium')) cardPriority = 'medium';
+                    else if (cls.includes('priority-high')) cardPriority = 'high';
+                    else if (cls.includes('priority-critical')) cardPriority = 'critical';
+                }
+
+                // Extract status from badge
+                var statusBadge = card.querySelector('.badge-status-todo, .badge-status-inprogress, .badge-status-done');
+                var cardStatus = '';
+                if (statusBadge) {
+                    var sCls = statusBadge.className;
+                    if (sCls.includes('status-todo')) cardStatus = 'todo';
+                    else if (sCls.includes('status-inprogress')) cardStatus = 'inprogress';
+                    else if (sCls.includes('status-done')) cardStatus = 'done';
+                }
+
+                // Extract assignee
+                var assigneeEl = card.querySelector('.bi-person');
+                var cardAssignee = '';
+                if (assigneeEl && assigneeEl.parentElement) {
+                    cardAssignee = assigneeEl.parentElement.textContent.trim();
+                }
+
+                var show = true;
+                if (searchVal && !title.includes(searchVal)) show = false;
+                if (priorityVal && cardPriority !== priorityVal) show = false;
+                if (statusVal && cardStatus !== statusVal) show = false;
+                if (assigneeVal) {
+                    if (assigneeVal === '__unassigned__') {
+                        if (cardAssignee !== 'غير معين') show = false;
+                    } else {
+                        if (!cardAssignee.includes(assigneeVal)) show = false;
+                    }
+                }
+
+                card.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+
+            // Update info
+            var infoEl = document.getElementById('kanbanFilterInfo');
+            var hasFilter = searchVal || priorityVal || statusVal || assigneeVal;
+            if (hasFilter) {
+                infoEl.classList.remove('d-none');
+                document.getElementById('kanbanVisibleCount').textContent = visible;
+                document.getElementById('kanbanTotalCount').textContent = total;
+            } else {
+                infoEl.classList.add('d-none');
+            }
+
+            // Update column counts
+            document.querySelectorAll('.kanban-column').forEach(function (col) {
+                var visibleInCol = col.querySelectorAll('.kanban-card:not([style*="display: none"])').length;
+                var countEl = col.querySelector('.kanban-col-count');
+                if (countEl) countEl.textContent = visibleInCol;
+            });
+        }
+
+        function resetKanbanFilters() {
+            document.getElementById('kanbanSearchInput').value = '';
+            document.getElementById('kanbanPriorityFilter').value = '';
+            document.getElementById('kanbanStatusFilter').value = '';
+            document.getElementById('kanbanAssigneeFilter').value = '';
+            filterKanbanCards();
+        }
+    </script>
+}

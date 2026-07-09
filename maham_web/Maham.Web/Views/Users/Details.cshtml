@@ -1,0 +1,238 @@
+@model Maham.Web.Services.WebUserDto
+@{
+    ViewData["Title"] = $"الملف الشخصي - {Model.FullName}";
+    var cards = ViewBag.Cards as List<Maham.Web.Services.WebCardDto> ?? new();
+    var projects = ViewBag.Projects as List<Maham.Web.Services.WebProjectDto> ?? new();
+    var activities = ViewBag.Activities as List<Maham.Web.Services.WebActivityDto> ?? new();
+    var isOwn = ViewBag.IsOwnProfile is true;
+
+    var totalCards = cards.Count;
+    var completedCards = cards.Count(c => c.Status.Equals("Done", StringComparison.OrdinalIgnoreCase));
+    var inProgressCards = cards.Count(c => c.Status.Equals("InProgress", StringComparison.OrdinalIgnoreCase));
+}
+
+<!-- Profile Header Banner -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 position-relative">
+    <div style="height: 140px; background: linear-gradient(135deg, #0f3460 0%, #16213e 50%, #e94560 100%);"></div>
+    <div class="card-body p-4 pt-0 position-relative" style="margin-top: -60px;">
+        <div class="d-flex flex-wrap align-items-end justify-content-between gap-3">
+            <div class="d-flex align-items-end gap-3 flex-wrap">
+                <div class="position-relative">
+                    @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                    {
+                        <img src="@Model.AvatarUrl" class="rounded-circle border border-4 border-white shadow-lg" width="110" height="110" style="object-fit: cover;" alt="@Model.FullName" />
+                    }
+                    else
+                    {
+                        <div class="rounded-circle bg-primary border border-4 border-white shadow-lg d-flex align-items-center justify-content-center text-white fw-bold" style="width: 110px; height: 110px; font-size: 2.8rem; background-color: #0f3460 !important;">
+                            @(Model.FullName.Length > 0 ? Model.FullName[0] : 'U')
+                        </div>
+                    }
+                    <span class="position-absolute bottom-0 end-0 p-2 bg-success border border-2 border-white rounded-circle" title="نشط الآن"></span>
+                </div>
+                <div class="mt-2">
+                    <h3 class="fw-bold mb-1 text-dark">@Model.FullName</h3>
+                    <div class="d-flex align-items-center gap-2 flex-wrap text-muted small">
+                        <span><i class="bi bi-envelope me-1 text-primary"></i>@Model.Email</span>
+                        <span>•</span>
+                        <span class="badge @(Model.Role == "Admin" ? "bg-danger" : "bg-primary") px-3 py-1 rounded-pill"><i class="bi bi-shield-check me-1"></i>@Model.Role</span>
+                        <span>•</span>
+                        <span><i class="bi bi-calendar-check me-1"></i>عضو منذ @Model.CreatedAt.ToString("yyyy/MM/dd")</span>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                @if (isOwn)
+                {
+                    <a href="/users/@Model.Id/avatar" class="btn btn-outline-primary rounded-pill"><i class="bi bi-camera me-1"></i>تغيير الصورة</a>
+                    <a href="/users/@Model.Id/edit" class="btn btn-primary rounded-pill" style="background-color: #0f3460; border-color: #0f3460;"><i class="bi bi-pencil me-1"></i>تعديل الملف</a>
+                }
+                else if (SessionHelper.IsAdmin(Context.Session))
+                {
+                    <a href="/users/@Model.Id/delete" class="btn btn-outline-danger rounded-pill"><i class="bi bi-trash me-1"></i>حذف الحساب</a>
+                }
+                <a href="/users" class="btn btn-outline-secondary rounded-pill"><i class="bi bi-arrow-right me-1"></i>قائمة الاعضاء</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Personal Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-4 border-primary">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-bold">المشاريع المشارك فيها</span>
+                    <h3 class="fw-bold text-primary mb-0 mt-1">@projects.Count</h3>
+                </div>
+                <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-circle">
+                    <i class="bi bi-folder2-open fs-3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-4 border-info">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-bold">إجمالي المهام المسندة</span>
+                    <h3 class="fw-bold text-info mb-0 mt-1">@totalCards</h3>
+                </div>
+                <div class="p-3 bg-info bg-opacity-10 text-info rounded-circle">
+                    <i class="bi bi-card-checklist fs-3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-4 border-warning">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-bold">المهام قيد التنفيذ</span>
+                    <h3 class="fw-bold text-warning mb-0 mt-1">@inProgressCards</h3>
+                </div>
+                <div class="p-3 bg-warning bg-opacity-10 text-warning rounded-circle">
+                    <i class="bi bi-hourglass-split fs-3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white border-start border-4 border-success">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-bold">المهام المنجزة</span>
+                    <h3 class="fw-bold text-success mb-0 mt-1">@completedCards</h3>
+                </div>
+                <div class="p-3 bg-success bg-opacity-10 text-success rounded-circle">
+                    <i class="bi bi-check-circle-fill fs-3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs Section -->
+<div class="card border-0 shadow-sm rounded-4 p-4">
+    <ul class="nav nav-pills mb-4 gap-2 border-bottom pb-3" id="profileTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-item nav-link active fw-bold px-4 rounded-pill" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects-tab-pane" type="button" role="tab">
+                <i class="bi bi-folder me-2"></i>المشاريع (@projects.Count)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-item nav-link fw-bold px-4 rounded-pill" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks-tab-pane" type="button" role="tab">
+                <i class="bi bi-card-checklist me-2"></i>البطاقات والمهام (@totalCards)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-item nav-link fw-bold px-4 rounded-pill" id="activities-tab" data-bs-toggle="tab" data-bs-target="#activities-tab-pane" type="button" role="tab">
+                <i class="bi bi-activity me-2"></i>سجل النشاطات (@activities.Count)
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="profileTabsContent">
+        <!-- 1. Projects Tab -->
+        <div class="tab-pane fade show active" id="projects-tab-pane" role="tabpanel">
+            @if (projects.Any())
+            {
+                <div class="row g-3">
+                    @foreach (var proj in projects)
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border-0 bg-light rounded-4 p-3 hover-shadow transition">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="fw-bold text-dark mb-0">
+                                        <a href="/projects/@proj.Id" class="text-decoration-none text-dark hover-primary">@proj.Name</a>
+                                    </h6>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary">@proj.BoardCount لوحات</span>
+                                </div>
+                                <p class="text-muted small text-truncate mb-3">@(proj.Description ?? "لا يوجد وصف")</p>
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                    <span class="small text-muted"><i class="bi bi-people me-1"></i>@proj.MemberCount أعضاء</span>
+                                    <a href="/projects/@proj.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state py-4 text-center">
+                    <i class="bi bi-folder-x display-4 text-muted"></i>
+                    <h6 class="fw-bold mt-2">لا يوجد مشاريع مشارك فيها بعد</h6>
+                </div>
+            }
+        </div>
+
+        <!-- 2. Tasks Tab -->
+        <div class="tab-pane fade" id="tasks-tab-pane" role="tabpanel">
+            @if (cards.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle w-100">
+                        <thead>
+                            <tr>
+                                <th>عنوان المهمة</th>
+                                <th>الأولوية</th>
+                                <th>الحالة</th>
+                                <th>تاريخ الاستحقاق</th>
+                                <th class="text-center">معاينة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var card in cards)
+                            {
+                                <tr>
+                                    <td class="fw-bold"><a href="/cards/@card.Id" class="text-decoration-none text-primary">@card.Title</a></td>
+                                    <td><span class="badge badge-priority-@card.Priority.ToLower()">@card.Priority</span></td>
+                                    <td><span class="badge badge-status-@card.Status.ToLower()">@card.Status</span></td>
+                                    <td>@(card.DueDate?.ToString("yyyy-MM-dd") ?? "لا يوجد")</td>
+                                    <td class="text-center"><a href="/cards/@card.Id" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state py-4 text-center">
+                    <i class="bi bi-card-checklist display-4 text-muted"></i>
+                    <h6 class="fw-bold mt-2">لا توجد بطاقات مسندة حالياً</h6>
+                </div>
+            }
+        </div>
+
+        <!-- 3. Activities Tab -->
+        <div class="tab-pane fade" id="activities-tab-pane" role="tabpanel">
+            @if (activities.Any())
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var act in activities)
+                    {
+                        <div class="list-group-item bg-transparent border-0 border-bottom py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-info bg-opacity-10 text-info me-2">@act.Action</span>
+                                    <strong class="text-dark">@act.Description</strong>
+                                </div>
+                                <small class="text-muted"><i class="bi bi-clock me-1"></i>@act.CreatedAt.ToString("MM-dd HH:mm")</small>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state py-4 text-center">
+                    <i class="bi bi-clock-history display-4 text-muted"></i>
+                    <h6 class="fw-bold mt-2">لا يمر سجل نشاطات مسجل بعد</h6>
+                </div>
+            }
+        </div>
+    </div>
+</div>

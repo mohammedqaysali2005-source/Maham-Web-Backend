@@ -1,0 +1,29 @@
+# Visual Studio / .NET
+*.user
+*.userosscache
+*.sln.docstates
+bin/
+obj/
+.vs/
+*.user
+[Dd]ebug/
+[Rr]elease/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+app-*.apk
+app-*.aab
+
+# OS Generated
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment variables
+*.env

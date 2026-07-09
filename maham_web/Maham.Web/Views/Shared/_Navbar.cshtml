@@ -1,0 +1,67 @@
+@using Maham.Web.Helpers
+@{
+    var isLoggedIn = SessionHelper.IsLoggedIn(Context.Session);
+    var userName = SessionHelper.GetUserName(Context.Session);
+    var userInitial = !string.IsNullOrEmpty(userName) ? userName.Substring(0, 1) : "م";
+}
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-maham">
+    <div class="container-fluid px-2">
+        <a class="navbar-brand navbar-brand-text" href="@(isLoggedIn ? "/dashboard" : "/")">
+            <div class="brand-icon">
+                <i class="bi bi-kanban-fill"></i>
+            </div>
+            <span>مَهَـ</span>ام
+        </a>
+
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-4">
+                @if (isLoggedIn)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 px-3 fw-bold" href="/dashboard"><i class="bi bi-grid-1x2-fill me-1 text-primary-light"></i> لوحة القيادة</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 px-3 fw-bold" href="/projects"><i class="bi bi-folder-fill me-1 text-primary-light"></i> المشاريع</a>
+                    </li>
+                }
+            </ul>
+
+            <div class="d-flex align-items-center gap-3">
+                @if (isLoggedIn)
+                {
+                    <!-- Notifications & Invitations -->
+                    <a href="/projects/invitations" class="nav-action-btn" title="الدعوات والتنبيهات">
+                        <i class="bi bi-bell-fill text-warning fs-5"></i>
+                        <span class="nav-badge-pill">جديد</span>
+                    </a>
+
+                    <!-- User Profile Pill -->
+                    <div class="d-flex align-items-center gap-2 px-3 py-1 bg-white bg-opacity-10 rounded-pill border border-white border-opacity-10">
+                        <div class="rounded-circle bg-indigo d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" style="width: 32px; height: 32px; background: var(--accent);">
+                            @userInitial
+                        </div>
+                        <span class="text-white fw-bold small me-1">@userName</span>
+                    </div>
+
+                    <a href="/auth/profile" class="nav-action-btn" title="الإعدادات والملف الشخصي">
+                        <i class="bi bi-gear-fill"></i>
+                    </a>
+
+                    <a href="/auth/logout" class="btn btn-sm btn-danger py-2 px-3" title="تسجيل الخروج">
+                        <i class="bi bi-box-arrow-left"></i> خروج
+                    </a>
+                }
+                else
+                {
+                    <a href="/auth/login" class="btn btn-sm btn-secondary px-3"><i class="bi bi-box-arrow-in-right"></i> تسجيل الدخول</a>
+                    <a href="/auth/register" class="btn btn-sm btn-primary px-3"><i class="bi bi-person-plus-fill"></i> إنشاء حساب</a>
+                }
+            </div>
+        </div>
+    </div>
+</nav>

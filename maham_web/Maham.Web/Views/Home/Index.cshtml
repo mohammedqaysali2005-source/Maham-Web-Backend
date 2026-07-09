@@ -1,0 +1,193 @@
+@model Maham.Web.Services.WebPublicStatsDto
+@{
+    ViewData["Title"] = "الرئيسية — منصة إدارة المشاريع التعاونية";
+}
+
+<!-- Hero Section -->
+<div class="hero-section text-white py-5 position-relative overflow-hidden" style="background: linear-gradient(135deg, #16213e 0%, #0f3460 100%); min-height: 85vh; display: flex; align-items: center;">
+    <div class="container py-5">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7 text-center text-lg-start">
+                <span class="badge px-3 py-2 rounded-pill mb-3 text-white fw-bold shadow-sm" style="background: #e94560; font-size: 0.9rem;">
+                    <i class="bi bi-stars me-1"></i> الحل الأمثل للطلاب والفرق المستقلة
+                </span>
+                <h1 class="hero-title mb-4 fw-extrabold display-4" style="line-height: 1.25;">
+                    إدارة مشاريعك بكفاءة وسلاسة مع منصة <span style="color: #e94560;">مهام</span>
+                </h1>
+                <p class="lead fs-5 mb-4 text-white-50" style="max-width: 620px; line-height: 1.7;">
+                    منصة عربية متكاملة لتبسيط إدارة المهام، متابعة لوحات Kanban التفاعلية، التعاون اللحظي مع أعضاء فريقك، وتحليل الأداء بدقة متناهية.
+                </p>
+                <div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-3 pt-2">
+                    <a href="/auth/register" class="btn btn-accent btn-lg px-4 py-3 shadow-lg rounded-3 fw-bold" style="background-color: #e94560; border-color: #e94560; color: white;">
+                        <i class="bi bi-rocket-takeoff me-2"></i>ابدأ مجاناً الآن
+                    </a>
+                    <a href="/auth/login" class="btn btn-outline-light btn-lg px-4 py-3 rounded-3 fw-bold">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>تسجيل الدخول
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card bg-white text-dark shadow-lg border-0 rounded-4 p-4 position-relative">
+                    <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fs-4 fw-extrabold text-primary" style="color: #0f3460 !important;">مه<span style="color: #e94560;">ام</span></span>
+                            <span class="badge bg-success">عاطي الآن</span>
+                        </div>
+                        <small class="text-muted"><i class="bi bi-shield-check text-primary me-1"></i>بيانات حية</small>
+                    </div>
+
+                    <!-- Dynamic Live Stats Cards from DB -->
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="p-3 rounded-3 text-center border bg-light">
+                                <h3 class="fw-bold mb-1 text-primary" style="color: #0f3460 !important;">@Model.TotalProjects</h3>
+                                <span class="text-muted small fw-semibold">المشاريع الإجمالية</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 rounded-3 text-center border bg-light">
+                                <h3 class="fw-bold mb-1 text-success">@Model.TotalUsers</h3>
+                                <span class="text-muted small fw-semibold">المستخدمون النشطون</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 rounded-3 text-center border bg-light">
+                                <h3 class="fw-bold mb-1 text-accent" style="color: #e94560 !important;">@Model.TotalCompletedCards</h3>
+                                <span class="text-muted small fw-semibold">المهام المكتملة</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 rounded-3 text-center border bg-light">
+                                <h3 class="fw-bold mb-1 text-info">@Model.TotalActiveBoards</h3>
+                                <span class="text-muted small fw-semibold">اللوحات النشطة</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container py-5 my-4">
+    <div class="text-center mb-5">
+        <h6 class="text-uppercase text-accent fw-bold mb-2" style="color: #e94560; letter-spacing: 1px;">المميزات الرئيسية</h6>
+        <h2 class="fw-bold display-6 text-primary" style="color: #0f3460;">كل ما تحتاجه لإنجاح مشاريعك في مكان واحد</h2>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="feature-card p-4 rounded-4 shadow-sm border bg-white h-100 text-center">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-kanban display-4 text-accent" style="color: #e94560;"></i>
+                </div>
+                <h5 class="fw-bold mb-3 text-primary" style="color: #0f3460;">لوحات Kanban مرنة</h5>
+                <p class="text-muted mb-0">سحب وإفلات البطاقات بسلاسة بين الأعمدة المخصصة، وتتبع تقدم المهام لحظة بلحظة.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="feature-card p-4 rounded-4 shadow-sm border bg-white h-100 text-center">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-people display-4 text-primary" style="color: #0f3460;"></i>
+                </div>
+                <h5 class="fw-bold mb-3 text-primary" style="color: #0f3460;">تعاون وتواجد لحظي</h5>
+                <p class="text-muted mb-0">تتبع المتواجدين حالياً في اللوحة بفضل تقنيات SignalR، وتوزيع المهام بحسب أدوار الأعضاء.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="feature-card p-4 rounded-4 shadow-sm border bg-white h-100 text-center">
+                <div class="feature-icon mb-3">
+                    <i class="bi bi-bar-chart-line display-4 text-success"></i>
+                </div>
+                <h5 class="fw-bold mb-3 text-primary" style="color: #0f3460;">تقارير ورسوم بيانية</h5>
+                <p class="text-muted mb-0">رسوم بيانية تفاعلية تدعم Chart.js لتوزيع المهام حسب الحالة والأولوية ومعدل الإنجاز.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Real Database Statistics Counter Section -->
+<div class="py-5 text-white my-4" style="background: #16213e;">
+    <div class="container text-center py-3">
+        <h3 class="fw-bold mb-4">أرقام حقيقية تُعبر عن منصة مهام</h3>
+        <div class="row g-4">
+            <div class="col-md-3 col-6">
+                <div class="p-3 border border-white-10 rounded-3" style="background: rgba(255,255,255,0.05);">
+                    <h2 class="display-5 fw-extrabold text-accent mb-1" style="color: #e94560;">@Model.TotalProjects</h2>
+                    <p class="mb-0 text-white-50 fw-semibold">مشروع مضاف</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="p-3 border border-white-10 rounded-3" style="background: rgba(255,255,255,0.05);">
+                    <h2 class="display-5 fw-extrabold text-info mb-1">@Model.TotalUsers</h2>
+                    <p class="mb-0 text-white-50 fw-semibold">مستخدم مسجل</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="p-3 border border-white-10 rounded-3" style="background: rgba(255,255,255,0.05);">
+                    <h2 class="display-5 fw-extrabold text-success mb-1">@Model.TotalCompletedCards</h2>
+                    <p class="mb-0 text-white-50 fw-semibold">مهمة مكتملة</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="p-3 border border-white-10 rounded-3" style="background: rgba(255,255,255,0.05);">
+                    <h2 class="display-5 fw-extrabold text-warning mb-1">@Model.TotalActiveBoards</h2>
+                    <p class="mb-0 text-white-50 fw-semibold">لوحة نشطة</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Workflow Section -->
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-primary display-6" style="color: #0f3460;">كيف تعمل منصة مهام؟</h2>
+        <p class="text-muted">خطوات بسيطة تفصلك عن تنظيم فريقك ومشاريعك</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="p-4 rounded-4 bg-light text-center h-100 border">
+                <div class="badge rounded-circle p-3 mb-3 fs-4" style="background-color: #0f3460; color: white; width: 54px; height: 54px;">1</div>
+                <h5 class="fw-bold mb-2">أنشئ حسابك المجاني</h5>
+                <p class="text-muted mb-0">سجّل في ثوانٍ معدودة وابدأ بتجربة كاملة ومجانية للمنصة.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4 rounded-4 bg-light text-center h-100 border">
+                <div class="badge rounded-circle p-3 mb-3 fs-4" style="background-color: #e94560; color: white; width: 54px; height: 54px;">2</div>
+                <h5 class="fw-bold mb-2">أنشئ مشروعك ولوحتك</h5>
+                <p class="text-muted mb-0">أضف لوحات Kanban والأعمدة التي تناسب خطة عمل فريقك.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4 rounded-4 bg-light text-center h-100 border">
+                <div class="badge rounded-circle p-3 mb-3 fs-4" style="background-color: #16213e; color: white; width: 54px; height: 54px;">3</div>
+                <h5 class="fw-bold mb-2">دعُ زملائك وانطلق</h5>
+                <p class="text-muted mb-0">أضف الأعضاء بالبريد الإلكتروني وزّع المهام وتابع التقدم مباشرة.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Footer Banner -->
+<div class="container my-5">
+    <div class="p-5 rounded-4 text-white text-center shadow-lg" style="background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);">
+        <h2 class="fw-bold mb-3">جاهز لإتاحة تجربة تنظيم فريدة لفريقك؟</h2>
+        <p class="lead mb-4 text-white-50">انضم اليوم إلى منصة مهام وابدأ العمل التعاوني الاحترافي.</p>
+        <a href="/auth/register" class="btn btn-accent btn-lg px-5 py-3 shadow-lg rounded-3 fw-bold" style="background-color: #e94560; border-color: #e94560; color: white;">
+            <i class="bi bi-person-plus me-2"></i>إنشاء حساب جديد مجاناً
+        </a>
+    </div>
+</div>
+
+<footer class="bg-dark text-white-50 text-center py-4 border-top">
+    <div class="container">
+        <p class="mb-0">&copy; @DateTime.Now.Year منصة <strong>مهام (Maham)</strong> — جميع الحقوق محفوظة</p>
+    </div>
+</footer>

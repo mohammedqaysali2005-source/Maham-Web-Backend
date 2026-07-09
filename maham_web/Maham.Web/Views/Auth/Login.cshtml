@@ -1,0 +1,112 @@
+@model Maham.Application.DTOs.Auth.LoginDto
+@{
+    ViewData["Title"] = "تسجيل الدخول";
+}
+
+<div class="row justify-content-center align-items-center min-vh-80 py-4">
+    <div class="col-lg-10 col-xl-9">
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+            <div class="row g-0">
+                <!-- قسم اليمين: كحلي داكن مع شعار مهام وعبارات تسويقية (حسب تصميم XD) -->
+                <div class="col-md-6 bg-secondary text-white p-5 d-flex flex-column justify-content-between position-relative" style="background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%) !important;">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-4">
+                            <span class="fs-1 fw-extrabold text-white">مه<span class="text-accent" style="color: var(--accent) !important;">ام</span></span>
+                        </div>
+                        <h2 class="fw-bold mb-3 display-6" style="line-height: 1.3;">منصة تعاونية رائدة لإدارة مشاريعك بحرفية</h2>
+                        <p class="text-white-50 fs-6 mb-4">
+                            نظّم مهامك، تابع لوحات الكانبان التفاعلية، وتواصل مع فريقك لحظياً بكل يسر وسهولة.
+                        </p>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top border-white-10">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(74,144,226,0.15); width: 42px; height: 42px;">
+                                <i class="bi bi-kanban text-accent fs-5" style="color: var(--accent) !important;"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-white">لوحات كانبان تفاعلية</h6>
+                                <small class="text-white-50">سحب وإفلات وإدارة لحظية</small>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(74,144,226,0.15); width: 42px; height: 42px;">
+                                <i class="bi bi-people text-accent fs-5" style="color: var(--accent) !important;"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-white">تأطير العمل الجماعي</h6>
+                                <small class="text-white-50">متابعة التواجد والأنشطة مباشرة</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- قسم اليسار: نموذج فاتح واحترافي -->
+                <div class="col-md-6 bg-white p-5 d-flex flex-column justify-content-center">
+                    <div class="mb-4">
+                        <h3 class="fw-bold text-primary mb-1">مرحباً بعودتك!</h3>
+                        <p class="text-muted">أدخل بيانات حسابك للوصول إلى لوحة التحكم</p>
+                    </div>
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show rounded-3" role="alert">
+                            <i class="bi bi-exclamation-circle-fill me-2"></i> @ViewBag.Error
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Login" method="post">
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold">البريد الإلكتروني</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
+                                <input asp-for="Email" type="email" class="form-control bg-light border-start-0 py-2 ps-2" placeholder="name@example.com" required />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label asp-for="Password" class="form-label fw-semibold mb-0">كلمة المرور</label>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-lock"></i></span>
+                                <input asp-for="Password" type="password" class="form-control bg-light border-start-0 py-2 ps-2" placeholder="••••••••" required />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold shadow-sm rounded-3 mb-3">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> تسجيل الدخول
+                        </button>
+                    </form>
+
+                    <!-- Quick Demo Login Box (For Live Presentation) -->
+                    <div class="p-3 mt-2 rounded-3 border border-danger border-opacity-25 bg-danger bg-opacity-10 text-center">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="small fw-bold text-danger"><i class="bi bi-shield-lock-fill me-1"></i>حساب العرض المباشر (Admin):</span>
+                            <span class="badge bg-danger">Live Demo ⚡</span>
+                        </div>
+                        <button type="button" class="btn btn-danger w-100 py-2 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" onclick="demoAdminLogin()">
+                            <i class="bi bi-lightning-charge-fill"></i> دخول فوري بحساب الأدمن (عرض الشركات)
+                        </button>
+                    </div>
+
+                    <script>
+                        function demoAdminLogin() {
+                            document.querySelector('input[name="Email"]').value = 'admin@maham.com';
+                            document.querySelector('input[name="Password"]').value = '12345678';
+                            document.querySelector('form').submit();
+                        }
+                    </script>
+
+                    <div class="text-center mt-3 pt-3 border-top">
+                        <p class="text-muted mb-0">ليس لديك حساب بعد؟ <a href="/auth/register" class="fw-bold text-decoration-none" style="color: var(--accent) !important;">إنشاء حساب جديد</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

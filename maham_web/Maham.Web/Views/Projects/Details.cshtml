@@ -1,0 +1,217 @@
+@using Maham.Web.Helpers
+@model Maham.Web.Services.WebProjectDto
+@{
+    ViewData["Title"] = Model.Name;
+    var members = ViewBag.Members as List<Maham.Web.Services.WebMemberDto> ?? new();
+    var boards = ViewBag.Boards as List<Maham.Web.Services.WebBoardDto> ?? new();
+    var activity = ViewBag.Activity as List<Maham.Web.Services.WebActivityDto> ?? new();
+    var dashboard = ViewBag.Dashboard as Maham.Web.Services.WebDashboardDto ?? new();
+}
+
+<div class="page-header">
+    <div>
+        <h2 class="page-title"><i class="bi bi-folder-fill"></i> @Model.Name</h2>
+        <span class="text-muted small"><i class="bi bi-calendar-event me-1"></i>تم الإنشاء في: @Model.CreatedAt.ToString("yyyy-MM-dd HH:mm")</span>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/projects/@Model.Id/edit" class="btn btn-secondary"><i class="bi bi-pencil-fill"></i> تعديل</a>
+        <a href="/projects/@Model.Id/delete" class="btn btn-danger"><i class="bi bi-trash-fill"></i> حذف</a>
+        <a href="/projects" class="btn btn-secondary"><i class="bi bi-arrow-right"></i> العودة للمشاريع</a>
+    </div>
+</div>
+
+<!-- Project Summary Description Card -->
+<div class="card p-4 mb-4">
+    <h5 class="fw-bold text-primary mb-2">نبذة عن المشروع وأهدافه</h5>
+    <p class="text-secondary m-0 lead fs-6">@(Model.Description ?? "لا يوجد وصف مضاف لهذا المشروع بعد.")</p>
+</div>
+
+<!-- KPI Stats Row -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-info">
+                <div class="stat-num">@dashboard.TotalCards</div>
+                <div class="stat-label">إجمالي المهام</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-boards">
+                <i class="bi bi-card-checklist"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-info">
+                <div class="stat-num text-success">@dashboard.DoneCards</div>
+                <div class="stat-label">المكتملة</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-members">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-info">
+                <div class="stat-num text-warning">@dashboard.InProgressCards</div>
+                <div class="stat-label">قيد العمل</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-projects">
+                <i class="bi bi-clock-fill"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-info">
+                <div class="stat-num text-danger">@dashboard.OverdueCards</div>
+                <div class="stat-label">المتأخرة</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-overdue">
+                <i class="bi bi-exclamation-octagon-fill"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs Navigation -->
+<ul class="nav nav-tabs nav-tabs-maham mb-4" id="projectTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="boards-tab" data-bs-toggle="tab" data-bs-target="#boards-pane" type="button" role="tab" aria-controls="boards-pane" aria-selected="true">
+            <i class="bi bi-kanban-fill me-2"></i> لوحات الكانبان (@boards.Count)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="members-tab" data-bs-toggle="tab" data-bs-target="#members-pane" type="button" role="tab" aria-controls="members-pane" aria-selected="false">
+            <i class="bi bi-people-fill me-2"></i> أعضاء الفريق (@members.Count)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity-pane" type="button" role="tab" aria-controls="activity-pane" aria-selected="false">
+            <i class="bi bi-lightning-charge-fill me-2"></i> سجل الأنشطة (@activity.Count)
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="projectTabContent">
+    <!-- 1. Boards Tab -->
+    <div class="tab-pane fade show active" id="boards-pane" role="tabpanel" aria-labelledby="boards-tab" tabindex="0">
+        <div class="card p-4">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h5 class="m-0 fw-bold"><i class="bi bi-kanban me-2 text-primary"></i>لوحات المهام التفاعلية</h5>
+                <a href="/boards/create/@Model.Id" class="btn btn-primary"><i class="bi bi-plus-lg"></i> إنشاء لوحة جديدة</a>
+            </div>
+
+            @if (boards.Any())
+            {
+                <div class="row g-4">
+                    @foreach (var board in boards)
+                    {
+                        <div class="col-md-4">
+                            <div class="card p-4 h-100 shadow-sm border-top border-4 border-primary d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="fw-bold mb-2">@board.Name</h5>
+                                    <p class="text-secondary small mb-3">@(board.Description ?? "لوحة لتنظيم وسحب المهام وتتبع الإنجاز.")</p>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                    <a href="/boards/@board.Id" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-kanban-fill me-1"></i> فتح اللوحة
+                                    </a>
+                                    <div class="d-flex gap-1">
+                                        <a href="/boards/@board.Id/edit" class="btn btn-sm btn-secondary p-1 px-2" title="تعديل"><i class="bi bi-pencil text-muted"></i></a>
+                                        <a href="/boards/@board.Id/delete" class="btn btn-sm btn-secondary p-1 px-2 text-danger" title="حذف"><i class="bi bi-trash"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state py-5 text-center">
+                    <i class="bi bi-grid-3x3-gap display-4 d-block mb-3 text-muted"></i>
+                    <h5 class="fw-bold">لا توجد لوحات كانبان مضافة لهذا المشروع بعد</h5>
+                    <p class="text-muted">قم بإنشاء لوحتك الأولى لتقسيم العمل إلى أعمدة وبطاقات تفاعلية.</p>
+                    <a href="/boards/create/@Model.Id" class="btn btn-primary mt-2"><i class="bi bi-plus-lg"></i> إنشاء أول لوحة</a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- 2. Members Tab -->
+    <div class="tab-pane fade" id="members-pane" role="tabpanel" aria-labelledby="members-tab" tabindex="0">
+        <div class="card p-4">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h5 class="m-0 fw-bold"><i class="bi bi-people me-2 text-primary"></i>فريق العمل المعتمد</h5>
+                <a href="/projects/@Model.Id/members/add" class="btn btn-primary"><i class="bi bi-person-plus-fill"></i> دعوة عضو جديد</a>
+            </div>
+
+            @if (members.Any())
+            {
+                <div class="row g-3">
+                    @foreach (var mem in members)
+                    {
+                        var initial = !string.IsNullOrEmpty(mem.UserName) ? mem.UserName.Substring(0, 1) : "ع";
+                        <div class="col-md-4">
+                            <div class="card p-3 h-100 shadow-sm">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" style="width: 44px; height: 44px; background: var(--accent); flex-shrink: 0;">
+                                        @initial
+                                    </div>
+                                    <div class="flex-grow-1 overflow-hidden">
+                                        <h6 class="fw-bold mb-0 text-truncate">@mem.UserName</h6>
+                                        <span class="text-muted small text-truncate d-block">@mem.UserEmail</span>
+                                    </div>
+                                    <span class="badge badge-role-@mem.Role.ToLower()">@TranslationHelper.ToArabicRole(mem.Role)</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state py-5 text-center">
+                    <i class="bi bi-person-x display-4 d-block mb-3 text-muted"></i>
+                    <h5 class="fw-bold">لا يوجد أعضاء في هذا المشروع سوى المالك</h5>
+                    <a href="/projects/@Model.Id/members/add" class="btn btn-primary mt-2"><i class="bi bi-person-plus-fill"></i> دعوة أول عضو</a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- 3. Activity Tab -->
+    <div class="tab-pane fade" id="activity-pane" role="tabpanel" aria-labelledby="activity-tab" tabindex="0">
+        <div class="card p-4">
+            <h5 class="fw-bold mb-4"><i class="bi bi-lightning-charge me-2 text-warning"></i>سجل الأنشطة والمتابعة الزمنية</h5>
+            <div class="activity-timeline">
+                @if (activity.Any())
+                {
+                    @foreach (var act in activity)
+                    {
+                        <div class="d-flex align-items-start gap-3 py-3 border-bottom">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" style="width: 38px; height: 38px; background: var(--accent); flex-shrink: 0;">
+                                <i class="bi bi-activity"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="fw-bold text-dark">@act.UserName</span> <span>@act.Action</span>
+                                <div class="text-muted small mt-1">@act.Description</div>
+                                <div class="text-secondary small mt-1">
+                                    <i class="bi bi-clock me-1"></i>@act.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state py-5 text-center">
+                        <i class="bi bi-clipboard-x display-4 d-block mb-3 text-muted"></i>
+                        <h6 class="text-muted mb-0">لا توجد أنشطة مسجلة لهذا المشروع بعد</h6>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

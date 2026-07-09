@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - لوحة التحكم والإدارة (Maham Admin)</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <style>
+        .admin-sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #0b1e36 0%, #1a1a2e 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+        .admin-nav-link {
+            color: #a0aec0;
+            padding: 12px 18px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .admin-nav-link:hover, .admin-nav-link.active {
+            background: rgba(233, 69, 96, 0.15);
+            color: #e94560;
+        }
+        .admin-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 16px 28px;
+        }
+        .admin-badge {
+            background: linear-gradient(135deg, #e94560 0%, #0f3460 100%);
+            color: #fff;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="d-flex">
+        <!-- Admin Sidebar -->
+        <aside class="admin-sidebar p-3 shadow-lg d-none d-md-block">
+            <div class="d-flex align-items-center gap-2 mb-4 px-2 pt-2">
+                <i class="bi bi-shield-lock-fill text-danger fs-3"></i>
+                <div>
+                    <h5 class="fw-bold mb-0 text-white">إدارة مهام</h5>
+                    <span class="admin-badge">Admin Control</span>
+                </div>
+            </div>
+            <hr class="border-secondary mb-4" />
+            <nav class="d-flex flex-column gap-2">
+                <a href="/admin/dashboard" class="admin-nav-link @(Context.Request.Path.Value?.Contains("/admin/dashboard") == true || Context.Request.Path.Value == "/admin" ? "active" : "")">
+                    <i class="bi bi-speedometer2"></i>الإحصائيات العامة
+                </a>
+                <a href="/admin/users" class="admin-nav-link @(Context.Request.Path.Value?.Contains("/admin/users") == true ? "active" : "")">
+                    <i class="bi bi-people-fill"></i>إدارة المستخدمين
+                </a>
+                <a href="/admin/projects" class="admin-nav-link @(Context.Request.Path.Value?.Contains("/admin/projects") == true ? "active" : "")">
+                    <i class="bi bi-folder-symlink-fill"></i>إدارة المشاريع
+                </a>
+                <hr class="border-secondary my-3" />
+                <a href="/dashboard" class="admin-nav-link text-warning">
+                    <i class="bi bi-arrow-right-circle-fill"></i>العودة للمشروع الرئيسي
+                </a>
+                <a href="/auth/logout" class="admin-nav-link text-danger mt-auto">
+                    <i class="bi bi-box-arrow-right"></i>تسجيل الخروج
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="flex-grow-1 d-flex flex-column" style="min-width: 0;">
+            <header class="admin-header d-flex align-items-center justify-content-between shadow-xs">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger fw-bold px-3 py-2">
+                        <i class="bi bi-shield-check me-1"></i>منطقة الأدمن المحمية
+                    </span>
+                    <h5 class="mb-0 text-dark fw-bold">لوحة التحكم المركزية</h5>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-muted small"><i class="bi bi-person-circle me-1 text-primary"></i>مرحباً: <strong>@SessionHelper.GetUserName(Context.Session)</strong></span>
+                    <a href="/dashboard" class="btn btn-sm btn-outline-primary rounded-pill"><i class="bi bi-house me-1"></i>الواجهة الرئيسية</a>
+                </div>
+            </header>
+
+            <main class="p-4 flex-grow-1">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-xs" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-xs" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

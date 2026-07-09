@@ -1,0 +1,60 @@
+@model List<Maham.Web.Services.WebColumnDto>
+@{
+    ViewData["Title"] = "أعمدة اللوحة";
+    var boardId = ViewBag.BoardId;
+    var boardName = ViewBag.BoardName as string;
+}
+
+<div class="page-header pb-2 mb-3">
+    <h2 class="page-title"><i class="bi bi-layout-three-columns text-accent me-2"></i>أعمدة اللوحة @(!string.IsNullOrEmpty(boardName) ? $"({boardName})" : "")</h2>
+    <div class="d-flex gap-2">
+        <a href="/boards/@boardId/columns/create" class="btn btn-accent"><i class="bi bi-plus-lg me-1"></i>إضافة عمود جديد</a>
+        <a href="/boards/@boardId" class="btn btn-outline-secondary"><i class="bi bi-arrow-right me-1"></i>عودة للوحة (Kanban)</a>
+    </div>
+</div>
+
+<div class="card shadow-sm p-4 border-0 rounded-4">
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle dt-table w-100">
+                <thead>
+                    <tr>
+                        <th>اسم العمود</th>
+                        <th>الترتيب (Order)</th>
+                        <th>حد العمل الجاري (WIP Limit)</th>
+                        <th>عدد البطاقات</th>
+                        <th class="text-center">عمليات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var col in Model.OrderBy(c => c.Order))
+                    {
+                        <tr>
+                            <td class="fw-bold text-primary">@col.Name</td>
+                            <td><span class="badge bg-secondary">@col.Order</span></td>
+                            <td>@(col.WipLimit.HasValue ? col.WipLimit.Value.ToString() : "غير محدد")</td>
+                            <td><span class="badge bg-info">@col.Cards.Count</span></td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="/columns/@col.Id" class="btn btn-primary" title="التفاصيل"><i class="bi bi-eye"></i></a>
+                                    <a href="/columns/@col.Id/cards" class="btn btn-info text-white" title="بطاقات العمود"><i class="bi bi-card-checklist"></i></a>
+                                    <a href="/columns/@col.Id/edit" class="btn btn-warning text-white" title="تعديل"><i class="bi bi-pencil"></i></a>
+                                    <a href="/columns/@col.Id/delete" class="btn btn-danger" title="حذف"><i class="bi bi-trash"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state py-5 text-center">
+            <i class="bi bi-layout-three-columns display-3 text-muted"></i>
+            <h5 class="fw-bold mt-3">لا توجد أعمدة في هذه اللوحة حتى الآن</h5>
+            <a href="/boards/@boardId/columns/create" class="btn btn-accent mt-2"><i class="bi bi-plus-lg me-1"></i>إضافة عمود جديد</a>
+        </div>
+    }
+</div>

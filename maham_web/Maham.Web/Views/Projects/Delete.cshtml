@@ -1,0 +1,28 @@
+@model Maham.Web.Services.WebProjectDto
+@{
+    ViewData["Title"] = "حذف المشروع";
+}
+
+<div class="row justify-content-center py-5">
+    <div class="col-md-6">
+        <div class="card p-4 shadow border border-danger">
+            <div class="text-center mb-4">
+                <i class="bi bi-exclamation-triangle text-danger display-1 mb-3 d-block"></i>
+                <h3 class="fw-bold text-danger">تأكيد حذف المشروع</h3>
+                <p class="fs-5 text-muted mt-2">
+                    هل أنت متأكد من حذف المشروع <strong class="text-dark">"@Model.Name"</strong>؟
+                </p>
+                <div class="alert alert-danger m-3 text-start">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i><strong>تحذير هام:</strong> حذف المشروع سيحذف بشكل نهائي كافة اللوحات والبطاقات والمرفقات والتعليقات المرتبطة به. لا يمكن التراجع عن هذا الإجراء أبداً.
+                </div>
+            </div>
+
+            <form id="delete-form" action="/projects/@Model.Id/delete" method="post">
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-danger px-4 py-2"><i class="bi bi-trash me-1"></i>نعم، احذف المشروع</button>
+                    <a href="/projects/@Model.Id" class="btn btn-outline-secondary px-4 py-2">إلغاء</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

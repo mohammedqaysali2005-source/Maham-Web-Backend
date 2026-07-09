@@ -1,0 +1,49 @@
+@model List<Maham.Web.Services.WebCardDto>
+@{
+    ViewData["Title"] = "مهام مستحقة اليوم";
+}
+
+<div class="page-header pb-2 mb-3">
+    <h2 class="page-title text-danger"><i class="bi bi-calendar-event me-2"></i>مهام مستحقة اليوم</h2>
+    <a href="/dashboard" class="btn btn-outline-secondary"><i class="bi bi-arrow-right me-1"></i>عودة للوحة القيادة</a>
+</div>
+
+<div class="card shadow-sm p-4">
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle dt-table w-100">
+                <thead>
+                    <tr>
+                        <th>عنوان المهمة</th>
+                        <th>الأولوية</th>
+                        <th>الحالة</th>
+                        <th>تاريخ الاستحقاق</th>
+                        <th class="text-center">عمليات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var card in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold"><a href="/cards/@card.Id" class="text-decoration-none text-primary">@card.Title</a></td>
+                            <td><span class="badge badge-priority-@card.Priority.ToLower()">@card.Priority</span></td>
+                            <td><span class="badge badge-status-@card.Status.ToLower()">@card.Status</span></td>
+                            <td>@(card.DueDate?.ToString("yyyy-MM-dd") ?? "لا يوجد")</td>
+                            <td class="text-center">
+                                <a href="/cards/@card.Id" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state py-5 text-center">
+            <i class="bi bi-calendar-check text-success display-3 d-block mb-3"></i>
+            <h6 class="text-muted mb-0 fw-bold">لا توجد مهام مستحقة اليوم!</h6>
+        </div>
+    }
+</div>

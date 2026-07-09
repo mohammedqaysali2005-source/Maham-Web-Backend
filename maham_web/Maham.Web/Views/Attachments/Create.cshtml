@@ -1,0 +1,34 @@
+@{
+    ViewData["Title"] = "رفع مرفق";
+    var cardId = ViewBag.CardId;
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-6">
+        <div class="card p-4 shadow-sm">
+            <h3 class="fw-bold text-primary mb-4 border-bottom pb-2">
+                <i class="bi bi-paperclip me-2 text-accent"></i>رفع مرفق جديد للبطاقة
+            </h3>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i> @ViewBag.Error
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <form action="/cards/@cardId/attachments/create" method="post" enctype="multipart/form-data">
+                <div class="mb-4">
+                    <label class="form-label fw-bold">اختر ملفاً لرفعه</label>
+                    <input type="file" name="file" class="form-control" required />
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-accent px-4 py-2"><i class="bi bi-upload me-1"></i> رفع الملف</button>
+                    <a href="/cards/@cardId" class="btn btn-outline-secondary px-4 py-2">إلغاء</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

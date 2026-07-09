@@ -1,0 +1,50 @@
+@model List<Maham.Web.Services.WebCardDto>
+@{
+    ViewData["Title"] = "بطاقات العمود";
+    var columnId = ViewBag.ColumnId;
+}
+
+<div class="page-header pb-2 mb-3">
+    <h2 class="page-title"><i class="bi bi-card-checklist me-2 text-accent"></i>بطاقات العمود</h2>
+    <a href="javascript:history.back()" class="btn btn-outline-secondary"><i class="bi bi-arrow-right me-1"></i>رجوع</a>
+</div>
+
+<div class="card shadow-sm p-4">
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle dt-table w-100">
+                <thead>
+                    <tr>
+                        <th>العنوان</th>
+                        <th>الأولوية</th>
+                        <th>الحالة</th>
+                        <th>تاريخ الاستحقاق</th>
+                        <th class="text-center">عمليات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var card in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold"><a href="/cards/@card.Id" class="text-decoration-none text-primary">@card.Title</a></td>
+                            <td><span class="badge badge-priority-@card.Priority.ToLower()">@card.Priority</span></td>
+                            <td><span class="badge badge-status-@card.Status.ToLower()">@card.Status</span></td>
+                            <td>@(card.DueDate?.ToString("yyyy-MM-dd") ?? "لا يوجد")</td>
+                            <td class="text-center">
+                                <a href="/cards/@card.Id" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state py-5 text-center">
+            <i class="bi bi-card-checklist display-4 d-block mb-3"></i>
+            <h6 class="text-muted">لا توجد بطاقات في هذا العمود</h6>
+        </div>
+    }
+</div>

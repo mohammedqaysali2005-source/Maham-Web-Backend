@@ -1,0 +1,27 @@
+@model Maham.Web.Services.WebMemberDto
+@{
+    ViewData["Title"] = "إزالة عضو";
+    var projectId = ViewBag.ProjectId;
+}
+
+<div class="row justify-content-center py-5">
+    <div class="col-md-6">
+        <div class="card p-4 shadow border border-danger text-center">
+            <i class="bi bi-person-x text-danger display-1 mb-3 d-block"></i>
+            <h3 class="fw-bold text-danger">تأكيد إزالة العضو</h3>
+            <p class="fs-5 text-muted mt-2">
+                هل أنت متأكد من إزالة <strong class="text-dark">@Model.UserName</strong> من المشروع؟
+            </p>
+            <div class="alert alert-warning m-3 text-start">
+                <i class="bi bi-info-circle-fill me-2"></i>سيفقد العضو حق الوصول لكافة لوحات وبطاقات هذا المشروع.
+            </div>
+
+            <form action="/projects/@projectId/members/@Model.UserId/remove" method="post">
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-danger px-4 py-2"><i class="bi bi-person-x me-1"></i>نعم، إزالة العضو</button>
+                    <a href="/projects/@projectId/members" class="btn btn-outline-secondary px-4 py-2">إلغاء</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

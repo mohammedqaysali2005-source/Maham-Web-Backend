@@ -1,0 +1,335 @@
+@using Maham.Web.Helpers
+@model Maham.Web.Services.WebDashboardDto
+@{
+    ViewData["Title"] = "لوحة المعلومات والتحليلات";
+    var myCards = ViewBag.MyCards as List<Maham.Web.Services.WebCardDto> ?? new();
+    var dueToday = ViewBag.DueToday as List<Maham.Web.Services.WebCardDto> ?? new();
+    var activities = ViewBag.Activities as List<Maham.Web.Services.WebActivityDto> ?? new();
+    var charts = ViewBag.ChartsData as Maham.Web.Services.WebChartDataDto ?? new();
+    var userName = SessionHelper.GetUserName(Context.Session);
+}
+
+<!-- Welcome Banner -->
+<div class="welcome-banner">
+    <div>
+        <h2>مرحباً بك مجدداً، @userName 👋</h2>
+        <p>نظرة عامة شمولية ومؤشرات أداء لحظية لإدارة مشاريعك وفريق العمل بكفاءة مؤسسية عالية.</p>
+    </div>
+    <div class="d-flex gap-3">
+        <a href="/projects/create" class="btn btn-primary shadow-lg">
+            <i class="bi bi-plus-circle-fill"></i> مشروع جديد
+        </a>
+        <a href="/cards/my" class="btn btn-secondary">
+            <i class="bi bi-kanban"></i> بطاقاتي
+        </a>
+    </div>
+</div>
+
+<!-- Row 1: KPI Stat Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-info">
+                <div class="stat-num">@Model.TotalProjects</div>
+                <div class="stat-label">المشاريع النشطة</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-projects">
+                <i class="bi bi-folder-fill"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-info">
+                <div class="stat-num">@Model.TotalCards</div>
+                <div class="stat-label">إجمالي المهام</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-boards">
+                <i class="bi bi-kanban-fill"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-info">
+                <div class="stat-num text-success">@Model.DoneCards</div>
+                <div class="stat-label">المهام المكتملة</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-members">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="stat-card">
+            <div class="stat-info">
+                <div class="stat-num text-danger">@Model.OverdueCards</div>
+                <div class="stat-label">المهام المتأخرة</div>
+            </div>
+            <div class="stat-icon-wrapper stat-icon-overdue">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 2: Analytics & Charts Section -->
+<div class="row g-4 mb-4">
+    <!-- Status Distribution -->
+    <div class="col-lg-4">
+        <div class="card h-100 p-3">
+            <div class="card-header bg-transparent border-0 pb-2">
+                <h5 class="m-0 fw-bold d-flex align-items-center gap-2">
+                    <i class="bi bi-pie-chart-fill text-primary"></i> توزيع البطاقات حسب الحالة
+                </h5>
+            </div>
+            <div class="card-body p-2 d-flex align-items-center justify-content-center" style="position: relative; height: 260px;">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Priority Distribution -->
+    <div class="col-lg-4">
+        <div class="card h-100 p-3">
+            <div class="card-header bg-transparent border-0 pb-2">
+                <h5 class="m-0 fw-bold d-flex align-items-center gap-2">
+                    <i class="bi bi-bar-chart-fill text-warning"></i> توزيع البطاقات حسب الأولوية
+                </h5>
+            </div>
+            <div class="card-body p-2 d-flex align-items-center justify-content-center" style="position: relative; height: 260px;">
+                <canvas id="priorityChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Velocity -->
+    <div class="col-lg-4">
+        <div class="card h-100 p-3">
+            <div class="card-header bg-transparent border-0 pb-2">
+                <h5 class="m-0 fw-bold d-flex align-items-center gap-2">
+                    <i class="bi bi-graph-up-arrow text-success"></i> حركة النشاط آخر 7 أيام
+                </h5>
+            </div>
+            <div class="card-body p-2 d-flex align-items-center justify-content-center" style="position: relative; height: 260px;">
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 3: Assigned Tasks & Today's Due -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card h-100 p-3">
+            <div class="card-header bg-transparent border-0 pb-3 d-flex align-items-center justify-content-between">
+                <h5 class="m-0 fw-bold d-flex align-items-center gap-2">
+                    <i class="bi bi-person-check-fill text-primary"></i> بطاقاتي المسندة إليّ
+                </h5>
+                <span class="badge badge-status-inprogress px-3 py-1">@myCards.Count بطاقة</span>
+            </div>
+            @if (myCards.Any())
+            {
+                <div class="row g-3">
+                    @foreach (var card in myCards)
+                    {
+                        var priorityColor = card.Priority.ToLower() == "low" ? "var(--success)" : 
+                                            card.Priority.ToLower() == "medium" ? "var(--warning)" : 
+                                            card.Priority.ToLower() == "high" ? "var(--danger)" : "var(--priority-critical)";
+                        <div class="col-md-6">
+                            <div class="card p-3 h-100 shadow-sm" style="border-right: 4px solid @priorityColor;">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="fw-bold mb-0">
+                                        <a href="/cards/@card.Id" class="text-decoration-none text-dark">@card.Title</a>
+                                    </h6>
+                                    <span class="badge badge-priority-@card.Priority.ToLower()">@TranslationHelper.ToArabicPriority(card.Priority)</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                    <span class="badge badge-status-@card.Status.ToLower()">@TranslationHelper.ToArabicStatus(card.Status)</span>
+                                    <span class="text-muted small">
+                                        <i class="bi bi-calendar-event me-1"></i>@(card.DueDate?.ToString("yyyy-MM-dd") ?? "بلا استحقاق")
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state py-5 text-center">
+                    <i class="bi bi-card-checklist display-4 text-muted mb-2"></i>
+                    <h6 class="text-muted fw-bold">لا توجد بطاقات مسندة إليك حالياً</h6>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card h-100 p-3">
+            <div class="card-header bg-transparent border-0 pb-3">
+                <h5 class="m-0 fw-bold text-danger d-flex align-items-center gap-2">
+                    <i class="bi bi-clock-history"></i> مهام مستحقة اليوم
+                </h5>
+            </div>
+            @if (dueToday.Any())
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var card in dueToday)
+                    {
+                        <a href="/cards/@card.Id" class="list-group-item list-group-item-action border rounded-3 p-3 mb-2 shadow-xs">
+                            <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                                <h6 class="mb-0 fw-bold text-primary">@card.Title</h6>
+                                <span class="badge badge-priority-@card.Priority.ToLower()">@card.Priority</span>
+                            </div>
+                            <small class="text-muted"><i class="bi bi-clock me-1"></i>اليوم</small>
+                        </a>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state py-5 text-center">
+                    <i class="bi bi-calendar-check text-success display-4 d-block mb-3"></i>
+                    <h6 class="text-muted mb-0 fw-bold">لا توجد مهام مستحقة اليوم!</h6>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Row 4: Recent Activity Stream -->
+<div class="card p-3">
+    <div class="card-header bg-transparent border-0 pb-3">
+        <h5 class="m-0 fw-bold d-flex align-items-center gap-2">
+            <i class="bi bi-lightning-charge-fill text-warning"></i> سجل الأنشطة المباشر
+        </h5>
+    </div>
+    <div class="activity-timeline px-3">
+        @if (activities.Any())
+        {
+            @foreach (var act in activities)
+            {
+                <div class="d-flex align-items-start gap-3 py-3 border-bottom">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" style="width: 38px; height: 38px; background: var(--accent); flex-shrink: 0;">
+                        <i class="bi bi-activity"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold text-dark">
+                            <strong>@act.UserName</strong> @act.Action
+                        </div>
+                        <div class="text-muted small">@act.Description</div>
+                        <div class="text-secondary small mt-1">
+                            <i class="bi bi-clock me-1"></i>@act.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state py-4 text-center">
+                <i class="bi bi-clipboard-x display-5 d-block mb-2 text-muted"></i>
+                <h6 class="text-muted mb-0">لا توجد أنشطة مسجلة مؤخراً</h6>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function () {
+            // 1. Status Chart (Modern Donut)
+            var statusLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(charts.StatusDistribution.Keys));
+            var statusValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(charts.StatusDistribution.Values));
+
+            var statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusValues,
+                        backgroundColor: ['#64748B', '#3B82F6', '#10B981'],
+                        borderWidth: 3,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Cairo', weight: 'bold' } } }
+                    }
+                }
+            });
+
+            // 2. Priority Chart
+            var priorityLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(charts.PriorityDistribution.Keys));
+            var priorityValues = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(charts.PriorityDistribution.Values));
+
+            var priorityCtx = document.getElementById('priorityChart').getContext('2d');
+            new Chart(priorityCtx, {
+                type: 'bar',
+                data: {
+                    labels: priorityLabels,
+                    datasets: [{
+                        label: 'عدد البطاقات',
+                        data: priorityValues,
+                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#F1F5F9' }, ticks: { font: { family: 'Cairo' } } },
+                        x: { grid: { display: false }, ticks: { font: { family: 'Cairo', weight: 'bold' } } }
+                    }
+                }
+            });
+
+            // 3. Activity Line Chart
+            var activityDates = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(charts.ActivityLast7Days.Select(a => a.Date)));
+            var activityCounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(charts.ActivityLast7Days.Select(a => a.Count)));
+
+            var activityCtx = document.getElementById('activityChart').getContext('2d');
+            new Chart(activityCtx, {
+                type: 'line',
+                data: {
+                    labels: activityDates,
+                    datasets: [{
+                        label: 'عدد الأنشطة',
+                        data: activityCounts,
+                        borderColor: '#4F46E5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.08)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#4F46E5',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#F1F5F9' }, ticks: { font: { family: 'Cairo' } } },
+                        x: { grid: { display: false }, ticks: { font: { family: 'Cairo' } } }
+                    }
+                }
+            });
+        });
+    </script>
+}

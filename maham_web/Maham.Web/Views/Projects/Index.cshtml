@@ -1,0 +1,111 @@
+@model List<Maham.Web.Services.WebProjectDto>
+@{
+    ViewData["Title"] = "المشاريع";
+    var search = ViewBag.Search as string;
+}
+
+<div class="page-header">
+    <div>
+        <h2 class="page-title"><i class="bi bi-folder-fill"></i> قائمة المشاريع المؤسسية</h2>
+        <span class="text-muted small">إدارة وتتبع مسارات العمل والفرق واللوحات الكانبان</span>
+    </div>
+    <a href="/projects/create" class="btn btn-primary shadow">
+        <i class="bi bi-plus-lg"></i> إضافة مشروع جديد
+    </a>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="card p-3 mb-4">
+    <form action="/projects" method="get" class="row g-3 align-items-center">
+        <div class="col-md-9">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" value="@search" class="form-control border-start-0" placeholder="ابحث باسم المشروع، الكلمات المفتاحية أو الوصف..." />
+            </div>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-funnel-fill"></i> تصفية
+            </button>
+            @if (!string.IsNullOrEmpty(search))
+            {
+                <a href="/projects" class="btn btn-secondary w-100"><i class="bi bi-x-circle"></i> إلغاء</a>
+            }
+        </div>
+    </form>
+</div>
+
+<!-- Grid Layout: Luxury Project Cards -->
+@if (Model.Any())
+{
+    <div class="project-grid">
+        @foreach (var proj in Model)
+        {
+            var initial = !string.IsNullOrEmpty(proj.Name) ? proj.Name.Substring(0, 1) : "م";
+            <div class="project-card-pro">
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <div class="project-avatar-pro">
+                        @initial
+                    </div>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h5 class="fw-bold mb-1 text-truncate" title="@proj.Name">@proj.Name</h5>
+                        </div>
+                        <span class="badge bg-light text-muted border small">
+                            <i class="bi bi-calendar-event me-1"></i>@proj.CreatedAt.ToString("yyyy-MM-dd")
+                        </span>
+                    </div>
+                </div>
+
+                <p class="text-secondary small mb-3 flex-grow-1" style="min-height: 42px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5;">
+                    @(proj.Description ?? "لا يوجد وصف محدد لهذا المشروع بعد. يمكنك إضافة وصف لتعريف فريق العمل بالأهداف.")
+                </p>
+
+                <!-- Project Metrics & Progress -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center small text-muted mb-1">
+                        <span>نسبة تقدم المهام</span>
+                        <span class="fw-bold text-dark">75%</span>
+                    </div>
+                    <div class="project-progress-bar">
+                        <div class="project-progress-fill" style="width: 75%;"></div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge badge-role-owner">
+                            <i class="bi bi-grid-3x3-gap-fill"></i> @proj.BoardCount لوحات
+                        </span>
+                        <span class="badge badge-status-todo">
+                            <i class="bi bi-people-fill"></i> @proj.MemberCount أعضاء
+                        </span>
+                    </div>
+
+                    <div class="d-flex gap-1">
+                        <a href="/projects/@proj.Id" class="btn btn-sm btn-primary py-1 px-3" title="فتح المشروع">
+                            <i class="bi bi-arrow-left-circle-fill"></i> فتح
+                        </a>
+                        <a href="/projects/@proj.Id/edit" class="btn btn-sm btn-secondary p-1 px-2" title="تعديل">
+                            <i class="bi bi-pencil-fill text-muted"></i>
+                        </a>
+                        <a href="/projects/@proj.Id/delete" class="btn btn-sm btn-secondary p-1 px-2 text-danger" title="حذف">
+                            <i class="bi bi-trash-fill"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="card p-5 text-center">
+        <div class="empty-state">
+            <i class="bi bi-folder-x display-3 text-muted d-block mb-3"></i>
+            <h4 class="fw-bold">@(string.IsNullOrEmpty(search) ? "لا توجد مشاريع مسجلة حتى الآن" : $"لا توجد نتائج تطابق \"{search}\"")</h4>
+            <p class="text-muted">ابدأ بإنشاء مشروعك الأول لتفعيل لوحات الكانبان وإدارة مهام الفريق.</p>
+            <a href="/projects/create" class="btn btn-primary mt-3"><i class="bi bi-plus-lg"></i> إنشاء مشروع جديد</a>
+        </div>
+    </div>
+}

@@ -1,0 +1,63 @@
+@model List<Maham.Web.Services.WebProjectDto>
+@{
+    ViewData["Title"] = "إدارة كافة المشاريع";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1"><i class="bi bi-folder-symlink-fill text-danger me-2"></i>إدارة كافة المشاريع بالنظام</h3>
+        <span class="text-muted">نظرة عامة شاملة لجميع مشاريع المنصة ورصد الأعضاء واللوحات</span>
+    </div>
+    <span class="badge bg-success fs-6 px-3 py-2 rounded-pill">إجمالي المشاريع: @Model.Count</span>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 p-4">
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle dt-table w-100">
+                <thead>
+                    <tr>
+                        <th>اسم المشروع</th>
+                        <th>الوصف</th>
+                        <th>عدد الأعضاء</th>
+                        <th>عدد اللوحات</th>
+                        <th>تاريخ الإنشاء</th>
+                        <th class="text-center">إجراءات الإدارة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var proj in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">
+                                <a href="/projects/@proj.Id" class="text-decoration-none text-primary fw-bold" target="_blank">
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>@proj.Name
+                                </a>
+                            </td>
+                            <td class="text-muted">@(proj.Description ?? "لا يوجد وصف")</td>
+                            <td><span class="badge bg-light text-dark border">@proj.MemberCount عضو</span></td>
+                            <td><span class="badge bg-light text-dark border">@proj.BoardCount لوحة</span></td>
+                            <td>@proj.CreatedAt.ToString("yyyy-MM-dd")</td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="/projects/@proj.Id" class="btn btn-outline-primary" title="معاينة المشروع" target="_blank"><i class="bi bi-eye"></i></a>
+                                    <form action="/admin/projects/@proj.Id/delete" method="post" class="d-inline" onsubmit="return confirm('هل أنت تأكد من رغبتك في حذف هذا المشروع بجميع لوحاته وبطاقاته؟');">
+                                        <button type="submit" class="btn btn-outline-danger ms-1" title="حذف المشروع كأدمن"><i class="bi bi-trash"></i> حذف</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state py-5 text-center">
+            <i class="bi bi-folder-x display-3 text-muted"></i>
+            <h5 class="fw-bold mt-3">لا توجد مشاريع مضافة في النظام حالياً</h5>
+        </div>
+    }
+</div>

@@ -1,0 +1,56 @@
+{
+  "id": "e5c464c8-356c-48b2-a42e-ec5f8c85779c",
+  "name": "Maham Environment",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5233",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "project_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "board_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "column_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "column_id2",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "card_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "comment_id",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_using": "Postman/10.0.0"
+}

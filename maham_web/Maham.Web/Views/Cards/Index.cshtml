@@ -1,0 +1,265 @@
+@using Maham.Web.Helpers
+@model List<Maham.Web.Services.WebCardDto>
+@{
+    ViewData["Title"] = "البطاقات";
+    var search = ViewBag.Search as string;
+    var priority = ViewBag.Priority as string;
+    var status = ViewBag.Status as string;
+    var due = ViewBag.Due as string;
+    var hasFilters = !string.IsNullOrEmpty(search) || !string.IsNullOrEmpty(priority) || !string.IsNullOrEmpty(status) || !string.IsNullOrEmpty(due);
+}
+
+<div class="page-header pb-2 mb-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <div>
+        <h2 class="page-title"><i class="bi bi-card-checklist text-accent me-2"></i>كل بطاقاتي</h2>
+        <span class="text-muted">قائمة المهام والبطاقات المسندة إليك عبر كافة المشاريع</span>
+    </div>
+
+    <!-- Toggle View Buttons: Table vs Gallery -->
+    <div class="btn-group shadow-sm" role="group" aria-label="عرض البطاقات">
+        <button type="button" class="btn btn-outline-primary" id="btnTableView" onclick="switchView('table')">
+            <i class="bi bi-table me-1"></i>عرض كجدول
+        </button>
+        <button type="button" class="btn btn-outline-primary active" id="btnGalleryView" onclick="switchView('gallery')">
+            <i class="bi bi-grid-3x3-gap me-1"></i>عرض كمعرض (Gallery)
+        </button>
+    </div>
+</div>
+
+<!-- Advanced Search & Filter Bar -->
+<div class="card shadow-sm p-3 mb-4 border-0 rounded-4">
+    <form action="/cards" method="get">
+        <div class="row g-2 align-items-end">
+            <!-- Search -->
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-search me-1"></i>بحث</label>
+                <input type="text" name="search" value="@search" class="form-control bg-light" placeholder="ابحث بعنوان أو وصف البطاقة..." />
+            </div>
+            <!-- Priority -->
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-flag me-1"></i>الأولوية</label>
+                <select name="priority" class="form-select bg-light">
+                    <option value="">الكل</option>
+                    <option value="Low" selected="@(priority == "Low" ? "selected" : null)">منخفضة (Low)</option>
+                    <option value="Medium" selected="@(priority == "Medium" ? "selected" : null)">متوسطة (Medium)</option>
+                    <option value="High" selected="@(priority == "High" ? "selected" : null)">عالية (High)</option>
+                    <option value="Critical" selected="@(priority == "Critical" ? "selected" : null)">حرجة (Critical)</option>
+                </select>
+            </div>
+            <!-- Status -->
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-clipboard-check me-1"></i>الحالة</label>
+                <select name="status" class="form-select bg-light">
+                    <option value="">الكل</option>
+                    <option value="Todo" selected="@(status == "Todo" ? "selected" : null)">قيد الانتظار (Todo)</option>
+                    <option value="InProgress" selected="@(status == "InProgress" ? "selected" : null)">جاري العمل (InProgress)</option>
+                    <option value="Done" selected="@(status == "Done" ? "selected" : null)">منتهية (Done)</option>
+                </select>
+            </div>
+            <!-- Due Date -->
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-calendar-event me-1"></i>الاستحقاق</label>
+                <select name="due" class="form-select bg-light">
+                    <option value="">الكل</option>
+                    <option value="overdue" selected="@(due == "overdue" ? "selected" : null)">متأخرة</option>
+                    <option value="today" selected="@(due == "today" ? "selected" : null)">اليوم</option>
+                    <option value="week" selected="@(due == "week" ? "selected" : null)">هذا الأسبوع</option>
+                    <option value="none" selected="@(due == "none" ? "selected" : null)">بدون موعد</option>
+                </select>
+            </div>
+            <!-- Submit -->
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100 fw-bold">
+                    <i class="bi bi-funnel me-1"></i>فلترة
+                </button>
+            </div>
+        </div>
+        @if (hasFilters)
+        {
+            <div class="mt-2 d-flex align-items-center gap-2 flex-wrap">
+                <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>فلاتر نشطة:</span>
+                @if (!string.IsNullOrEmpty(search))
+                {
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">
+                        <i class="bi bi-search me-1"></i>"@search"
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(priority))
+                {
+                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning">
+                        <i class="bi bi-flag me-1"></i>@priority
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(status))
+                {
+                    <span class="badge bg-info bg-opacity-10 text-dark border border-info">
+                        <i class="bi bi-clipboard-check me-1"></i>@status
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(due))
+                {
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">
+                        <i class="bi bi-calendar me-1"></i>@due
+                    </span>
+                }
+                <a href="/cards" class="btn btn-sm btn-outline-secondary ms-2"><i class="bi bi-x-circle me-1"></i>مسح الكل</a>
+            </div>
+        }
+    </form>
+</div>
+
+<!-- Results Count -->
+<div class="mb-3 d-flex justify-content-between align-items-center">
+    <span class="text-muted small">
+        <i class="bi bi-card-list me-1"></i>
+        عرض <strong class="text-primary">@Model.Count</strong> بطاقة
+        @if (hasFilters) { <span>(مفلترة)</span> }
+    </span>
+</div>
+
+<div class="card shadow-sm p-4 border-0 rounded-4">
+    @if (Model.Any())
+    {
+        <!-- 1. Table View -->
+        <div id="tableView" class="view-container d-none">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle dt-table w-100">
+                    <thead>
+                        <tr>
+                            <th>عنوان المهمة</th>
+                            <th>الأولوية</th>
+                            <th>الحالة</th>
+                            <th>تاريخ الاستحقاق</th>
+                            <th class="text-center">عمليات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var card in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold">
+                                    <a href="/cards/@card.Id" class="text-decoration-none text-primary">@card.Title</a>
+                                </td>
+                                <td><span class="badge badge-priority-@card.Priority.ToLower()">@TranslationHelper.ToArabicPriority(card.Priority)</span></td>
+                                <td><span class="badge badge-status-@card.Status.ToLower()">@TranslationHelper.ToArabicStatus(card.Status)</span></td>
+                                <td>@(card.DueDate?.ToString("yyyy-MM-dd") ?? "لا يوجد")</td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/cards/@card.Id" class="btn btn-primary" title="التفاصيل"><i class="bi bi-eye"></i></a>
+                                        <a href="/cards/@card.Id/edit" class="btn btn-warning text-white" title="تعديل"><i class="bi bi-pencil"></i></a>
+                                        <a href="/cards/@card.Id/delete" class="btn btn-danger" title="حذف"><i class="bi bi-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. Gallery View (Utilizing CoverImageUrl) -->
+        <div id="galleryView" class="view-container">
+            <div class="row g-4">
+                @foreach (var card in Model)
+                {
+                    <div class="col-md-6 col-lg-4 col-xl-3">
+                        <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden position-relative hover-shadow transition">
+                            <!-- Cover Image Header -->
+                            @if (!string.IsNullOrEmpty(card.CoverImageUrl))
+                            {
+                                <div style="height: 160px; overflow: hidden; background-color: #f8f9fa;">
+                                    <img src="@card.CoverImageUrl" class="w-100 h-100" style="object-fit: cover;" alt="@card.Title" />
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="p-4 text-center text-white d-flex align-items-center justify-content-center" style="height: 120px; background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%) !important;">
+                                    <i class="bi bi-card-heading display-4 opacity-50"></i>
+                                </div>
+                            }
+
+                            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                                        <span class="badge badge-status-@card.Status.ToLower()">@TranslationHelper.ToArabicStatus(card.Status)</span>
+                                        <span class="badge badge-priority-@card.Priority.ToLower()">@TranslationHelper.ToArabicPriority(card.Priority)</span>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-2" style="line-height: 1.4;">
+                                        <a href="/cards/@card.Id" class="text-decoration-none text-dark hover-primary">@card.Title</a>
+                                    </h6>
+                                    @if (!string.IsNullOrEmpty(card.Description))
+                                    {
+                                        <p class="text-muted small text-truncate mb-3" style="max-height: 40px;">@card.Description</p>
+                                    }
+                                </div>
+
+                                <div class="pt-3 border-top mt-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <small class="text-muted"><i class="bi bi-person me-1"></i>@(card.AssigneeName ?? "غير معين")</small>
+                                        @if (card.DueDate.HasValue)
+                                        {
+                                            <small class="fw-semibold @(card.DueDate.Value < DateTime.Today && card.Status != "Done" ? "text-danger" : "text-muted")">
+                                                <i class="bi bi-calendar me-1"></i>@card.DueDate.Value.ToString("MM-dd")
+                                            </small>
+                                        }
+                                    </div>
+
+                                    <div class="d-flex gap-2">
+                                        <a href="/cards/@card.Id" class="btn btn-sm btn-primary w-100"><i class="bi bi-eye me-1"></i>عرض</a>
+                                        <a href="/cards/@card.Id/edit" class="btn btn-sm btn-warning text-white"><i class="bi bi-pencil"></i></a>
+                                        <a href="/cards/@card.Id/delete" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state py-5 text-center">
+            <i class="bi bi-card-checklist display-3 text-muted"></i>
+            @if (hasFilters)
+            {
+                <h5 class="fw-bold mt-3">لا توجد بطاقات تطابق معايير البحث</h5>
+                <p class="text-muted">جرّب تعديل الفلاتر أو مسح معايير البحث.</p>
+                <a href="/cards" class="btn btn-outline-primary mt-2"><i class="bi bi-x-circle me-1"></i>مسح جميع الفلاتر</a>
+            }
+            else
+            {
+                <h5 class="fw-bold mt-3">لا توجد بطاقات مسندة إليك حالياً</h5>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function switchView(viewType) {
+            if (viewType === 'gallery') {
+                $('#tableView').addClass('d-none');
+                $('#galleryView').removeClass('d-none');
+                $('#btnGalleryView').addClass('active');
+                $('#btnTableView').removeClass('active');
+                localStorage.setItem('cards_view_pref', 'gallery');
+            } else {
+                $('#galleryView').addClass('d-none');
+                $('#tableView').removeClass('d-none');
+                $('#btnTableView').addClass('active');
+                $('#btnGalleryView').removeClass('active');
+                localStorage.setItem('cards_view_pref', 'table');
+            }
+        }
+
+        $(document).ready(function () {
+            var savedPref = localStorage.getItem('cards_view_pref');
+            if (savedPref === 'table') {
+                switchView('table');
+            } else {
+                switchView('gallery');
+            }
+        });
+    </script>
+}

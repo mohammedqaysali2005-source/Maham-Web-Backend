@@ -1,0 +1,46 @@
+@model List<Maham.Web.Services.WebActivityDto>
+@{
+    ViewData["Title"] = "سجل نشاطاتي";
+}
+
+<div class="page-header pb-2 mb-3">
+    <h2 class="page-title"><i class="bi bi-activity text-accent me-2"></i>سجل نشاطاتي</h2>
+    <span class="text-muted">سجل كافة إجراءاتك عبر المشاريع والمهام</span>
+</div>
+
+<div class="card shadow-sm p-4">
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle dt-table w-100">
+                <thead>
+                    <tr>
+                        <th>الإجراء</th>
+                        <th>الوصف</th>
+                        <th>تاريخ الحدث</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var act in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="badge bg-secondary py-2 px-3">@act.Action</span>
+                            </td>
+                            <td>@act.Description</td>
+                            <td class="text-muted">@act.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state py-5 text-center">
+            <i class="bi bi-clipboard-x"></i>
+            <h5>لا يوجد سجل نشاط حتى الآن</h5>
+            <p class="text-muted">سيظهر هنا سجل كل إجراء تقوم به في المشروع.</p>
+        </div>
+    }
+</div>

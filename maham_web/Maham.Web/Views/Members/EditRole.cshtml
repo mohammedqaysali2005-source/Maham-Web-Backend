@@ -1,0 +1,37 @@
+@model Maham.Application.DTOs.Project.UpdateProjectMemberDto
+@{
+    ViewData["Title"] = "تعديل دور العضو";
+    var projectId = ViewBag.ProjectId;
+    var userId = ViewBag.UserId;
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-md-6">
+        <div class="card p-4 shadow-sm">
+            <h3 class="fw-bold text-warning mb-4 border-bottom pb-2">
+                <i class="bi bi-shield-lock me-2 text-primary"></i>تعديل دور العضو في المشروع
+            </h3>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle-fill me-2"></i> @ViewBag.Error
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <form action="/projects/@projectId/members/@userId/role" method="post">
+                <div class="mb-4">
+                    <label asp-for="Role" class="form-label">الدور الجديد في المشروع</label>
+                    <select asp-for="Role" class="form-select" asp-items="Html.GetEnumSelectList<Maham.Domain.Enums.ProjectMemberRole>()"></select>
+                    <span asp-validation-for="Role" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-warning text-white px-4 py-2"><i class="bi bi-save me-1"></i> حفظ التغيير</button>
+                    <a href="/projects/@projectId/members" class="btn btn-outline-secondary px-4 py-2">إلغاء</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

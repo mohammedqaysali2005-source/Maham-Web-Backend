@@ -1,0 +1,59 @@
+@model List<Maham.Web.Services.WebAttachmentDto>
+@{
+    ViewData["Title"] = "المرفقات";
+    var cardId = ViewBag.CardId;
+}
+
+<div class="page-header pb-2 mb-3">
+    <h2 class="page-title"><i class="bi bi-paperclip text-accent me-2"></i>ملفات المهمة المرفقة</h2>
+    <div class="d-flex gap-2">
+        <a href="/cards/@cardId/attachments/create" class="btn btn-accent"><i class="bi bi-upload me-1"></i>رفع ملف جديد</a>
+        <a href="/cards/@cardId" class="btn btn-outline-secondary"><i class="bi bi-arrow-right me-1"></i>عودة للبطاقة</a>
+    </div>
+</div>
+
+<div class="card shadow-sm p-4">
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle dt-table w-100">
+                <thead>
+                    <tr>
+                        <th>اسم الملف</th>
+                        <th>الحجم</th>
+                        <th>النوع</th>
+                        <th>رفع بواسطة</th>
+                        <th>تاريخ الرفع</th>
+                        <th class="text-center">عمليات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var att in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">@att.FileName</td>
+                            <td>@((att.FileSize / 1024.0).ToString("F1")) KB</td>
+                            <td>@att.MimeType</td>
+                            <td>@att.UploadedByName</td>
+                            <td>@att.UploadedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="/attachments/@att.Id" class="btn btn-primary" title="التفاصيل"><i class="bi bi-eye"></i></a>
+                                    <a href="/attachments/@att.Id/download" class="btn btn-success text-white" title="تحميل"><i class="bi bi-download"></i></a>
+                                    <a href="/attachments/@att.Id/delete" class="btn btn-danger" title="حذف"><i class="bi bi-trash"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state py-5 text-center">
+            <i class="bi bi-paperclip"></i>
+            <h5>لا توجد مرفقات حتى الآن</h5>
+        </div>
+    }
+</div>

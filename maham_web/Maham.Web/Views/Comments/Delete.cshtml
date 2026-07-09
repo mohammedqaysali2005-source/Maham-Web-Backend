@@ -1,0 +1,26 @@
+@model Maham.Web.Services.WebCommentDto
+@{
+    ViewData["Title"] = "حذف التعليق";
+}
+
+<div class="row justify-content-center py-5">
+    <div class="col-md-6">
+        <div class="card p-4 shadow border border-danger text-center">
+            <i class="bi bi-trash text-danger display-1 mb-3 d-block"></i>
+            <h3 class="fw-bold text-danger">تأكيد حذف التعليق</h3>
+            <p class="fs-5 text-muted mt-2">هل أنت متأكد من حذف هذا التعليق؟</p>
+
+            <div class="p-3 bg-light rounded text-start my-3">
+                <small class="text-muted d-block mb-1">نص التعليق:</small>
+                <p class="mb-0 fw-semibold text-dark">@Model.Content</p>
+            </div>
+
+            <form id="delete-form" action="/comments/@Model.Id/delete" method="post">
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="submit" class="btn btn-danger px-4 py-2"><i class="bi bi-trash me-1"></i>نعم، احذف</button>
+                    <a href="/cards/@Model.CardId" class="btn btn-outline-secondary px-4 py-2">إلغاء</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

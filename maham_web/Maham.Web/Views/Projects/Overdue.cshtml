@@ -1,0 +1,53 @@
+@model List<Maham.Web.Services.WebCardDto>
+@{
+    ViewData["Title"] = "المهام المتأخرة";
+    var projectId = ViewBag.ProjectId;
+}
+
+<div class="page-header">
+    <h2 class="page-title text-danger"><i class="bi bi-exclamation-octagon me-2"></i>المهام المتأخرة للمشروع</h2>
+    <a href="/projects/@projectId" class="btn btn-outline-secondary"><i class="bi bi-arrow-right me-1"></i>عودة للمشروع</a>
+</div>
+
+<div class="card shadow-sm p-4">
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle dt-table w-100">
+                <thead>
+                    <tr>
+                        <th>عنوان المهمة</th>
+                        <th>الأولوية</th>
+                        <th>الحالة</th>
+                        <th>المسؤول عنها</th>
+                        <th>تاريخ الاستحقاق</th>
+                        <th class="text-center">عمليات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var card in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold"><a href="/cards/@card.Id" class="text-decoration-none text-primary">@card.Title</a></td>
+                            <td><span class="badge badge-priority-@card.Priority.ToLower()">@card.Priority</span></td>
+                            <td><span class="badge badge-status-@card.Status.ToLower()">@card.Status</span></td>
+                            <td>@(card.AssigneeName ?? "غير معين")</td>
+                            <td class="text-danger fw-bold">@(card.DueDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                            <td class="text-center">
+                                <a href="/cards/@card.Id" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+            <h5>رائع! لا توجد مهام متأخرة</h5>
+            <p class="text-muted">جميع المهام في هذا المشروع تسير وفق الخطة الزمنية.</p>
+        </div>
+    }
+</div>
